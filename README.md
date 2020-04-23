@@ -242,7 +242,10 @@ necessary.
 
 If you use AppleWin and you have sed installed, you can also uncomment the
 PREEMUCMD := sed... command which will copy the game symbols to the emulator for
-use.
+use.  For that to really make sense, you should to do this make command once: 
+make OPTIONS=mapfile,labelfile,listing,debugfile.  That will make a file called
+Makefile.options that will be re-used, and will generate a label file with all 
+the labels.
 
 Once done, you can build and play the game with the command: make dsk test
 
