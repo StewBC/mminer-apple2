@@ -201,7 +201,7 @@ ui.inc | User facing screens (title, scroller)
 variables.inc | All variables (scores, instance buffers, positions, etc.)
 Willy.inc | All logic relating to the movement of the main character, Willy
 
-The second is the ProDos loader that will auto-load the game.  It's in the
+The second is the ProDOS loader that will auto-load the game.  It's in the
 src/apple2.loader folder.  It has these files (all provided to me by Oliver
 Schmidt)
 
@@ -225,7 +225,7 @@ The next step is to make a bootable disk image.  For this, you will need 3rd
 party software.  I use AppleCommander.  This software will put the loader and
 game into the disk image. You will need to install Java to use AppleCommander.  
 
-The apple2/template.dsk is a "blank ProDos floppy" that has the loader and the
+The apple2/template.dsk is a "blank ProDOS floppy" that has the loader and the
 game placed on it by AppleCommander.
 
 To make the disc image, set an environment variable to point at apple commander
