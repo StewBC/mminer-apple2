@@ -17,6 +17,8 @@ The game is complete.
 There's a pre-built Apple II disk of the project, mminer.dsk under the
 releases tab.  This can be played directly in emulators.
 
+There's also a video of the game here: https://youtu.be/OGxj_g1ImhM
+
 3. DIFFERENCES FROM THE ORIGINAL
 
 There are several differences that all have to do with Apple II hardware
@@ -98,20 +100,20 @@ music turned off, since there's no artificial delay.
 
 Hex | Dec | Frame % | Item
 --- | --- | --- | ---
-18A72 | 100978 | 100% | Total Frame
+19C3E | 105534 | 100% | Total Frame
 18 | 24 | 0% | inputGet
 E8 | 232 | 0% | willyMove
 80 | 128 | 0% | gameAI
-5EF3 | 24307 | 24% | screenClear
+5EF3 | 24307 | 23% | screenClear
 123 | 291 | 0% | tilesAnimateKeys
 47 | 71 | 0% | tilesAnimateConveyor
 6EB | 1771 | 2% | screenDrawSprites
 C55 | 3157 | 3% | screenDrawWilly
-C6FD | 50941 | 50% | screenDrawLevel
-DDA | 3546 | 4% | uiUpdate
+C6FD | 50941 | 48% | screenDrawLevel
+DDA | 3546 | 3% | uiUpdate
 3A | 58 | 0% | screenDrawSprite (door)
 26 | 38 | 0% | screenSwap
-51BD | 20925 | 21% | audioPlayNote
+51BD | 20925 | 20% | audioPlayNote
 
 As can be seen, clearing the area where the world will be drawn takes almost 24%
 of the frame and drawing the level tiles takes about 50% of the frame!
@@ -174,35 +176,39 @@ I tried to thoroughly comment all the code.
 There are actually 2 programs in this.  The 1st is the game, and it's in
 src/apple2.
 
-* audio.inc      - Routines to make the speaker beep
-* defs.inc       - Constants and definitions used throughout
-* game.inc       - The in-game logic, AI etc.  The bulk of the "game"
-* input.inc      - User controls for game and editor
-* level.inc      - Decompress a level and place the keys
-* logo.hgr       - 8Kb splash screen in HGR format
-* logo.inc       - File that simply does an incbin on logo.hgr
-* mminer.asm     - Where the game starts, initial setup, etc.
-* mminer.cfg     - ca65 configuration file
-* roaudio.inc    - Frequency and timing data for music and SFX
-* rofont.inc     - A ZX Spectrum font
-* rolevels.inc   - Level layout, tile usage, sprite positions, etc.
-* rosprites.inc  - Sprite definitions
-* rosystem.inc   - Helper tables (multiplication, color masks, etc.)
-* rotext.inc     - All text used in the game
-* rotiles.inc    - Background tile definitions
-* screen.inc     - Code related to drawing tiles, sprites, etc.
-* sprite.inc     - Code for making instances of sprites, coloring them, etc.
-* text.inc       - In game text and print functions
-* ui.inc         - User facing screens (title, scroller)
-* variables.inc  - All variables (scores, instance buffers, positions, etc.)
-* Willy.inc      - All logic relating to the movement of the main character, Willy
+File | Desc
+--- | ---
+audio.inc | Routines to make the speaker beep
+defs.inc | Constants and definitions used throughout
+game.inc | The in-game logic, AI etc.  The bulk of the "game"
+input.inc | User controls for game and editor
+level.inc | Decompress a level and place the keys
+logo.hgr | 8Kb splash screen in HGR format
+logo.inc | File that simply does an incbin on logo.hgr
+mminer.asm | Where the game starts, initial setup, etc.
+mminer.cfg | ca65 configuration file
+roaudio.inc | Frequency and timing data for music and SFX
+rofont.inc | A ZX Spectrum font
+rolevels.inc | Level layout, tile usage, sprite positions, etc.
+rosprites.inc | Sprite definitions
+rosystem.inc | Helper tables (multiplication, color masks, etc.)
+rotext.inc | All text used in the game
+rotiles.inc | Background tile definitions
+screen.inc | Code related to drawing tiles, sprites, etc.
+sprite.inc | Code for making instances of sprites, coloring them, etc.
+text.inc | In game text and print functions
+ui.inc | User facing screens (title, scroller)
+variables.inc | All variables (scores, instance buffers, positions, etc.)
+Willy.inc | All logic relating to the movement of the main character, Willy
 
 The second is the ProDos loader that will auto-load the game.  It's in the
 src/apple2.loader folder.  It has these files (all provided to me by Oliver
 Schmidt)
 
-* loader.cfg     - ca65 configuration file
-* loader.s       - file to load and start the game
+File | Desc
+--- | ---
+loader.cfg | ca65 configuration file
+loader.s | file to load and start the game
 
 7. BUILDING THE GAME
 
