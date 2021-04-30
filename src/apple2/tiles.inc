@@ -30,10 +30,10 @@ mask:
     jsr tilesPrepKeysTiles                      ; make animated keys from the key tile
     jmp tilesPrepConveyorTiles                  ; Make rotated conveyor tiles into conveyorAnimTiles
 
-.endproc 
+.endproc
 
 ;-----------------------------------------------------------------------------
-.proc tilesMakeInstances 
+.proc tilesMakeInstances
 
     numTiles   = sizeL
     iLevelTile = sizeH
@@ -42,7 +42,7 @@ mask:
     tileMemH   = srcPtrH
 
     lda #TILES_PER_LEVEL                        ; for all tiles used in a level
-    sta numTiles 
+    sta numTiles
 
     lda #TILE_BYTES - 1                         ; start at the end of tile memory
     sta iWrite
@@ -59,20 +59,20 @@ loop:
     lda levelTiles, x                           ; and get the id for the tile from the table
 
     asl                                         ; mult tile offset * 16 (width of a tile)
-    asl 
-    asl 
+    asl
+    asl
     rol tileMemH
-    asl 
+    asl
     rol tileMemH                                ; offset of tile start (from background) now in tileMem ptr
     adc #<tiles                                 ; add tiles base address
     sta tileMemL
-    lda #>tiles 
-    adc tileMemH 
+    lda #>tiles
+    adc tileMemH
     sta tileMemH                                ; tileMem pointer now points at memory for the tile
 
     ldy #TILE_BYTES - 1                         ; 0 based, copy all the bytes of the tile
     ldx iWrite
-    
+
 :
     lda (tileMemL), y                           ; get the tile byte
     sta tilesInstances, x                       ; and save it to instance 0
@@ -84,19 +84,15 @@ loop:
     beq copyDone                                ; see if all tiles done
 
     lda iWrite                                  ; more tiles to do, adjust the tile write ptr
-    clc 
+    clc
     adc #TILE_BYTES                             ; by moving it to the end of the next tile
-    sta iWrite 
+    sta iWrite
     inc iLevelTile                              ; and advance the index into the table to the next tile
     bne loop                                    ; BRA to do the next tile
 
 copyDone:
     rts
 
-.endproc 
-
-.proc tilesColorCollapsing
-    rts
 .endproc
 
 ;-----------------------------------------------------------------------------
@@ -118,7 +114,7 @@ copyDone:
 
     ldy currLevel                               ; get the offset of the tiles in the level tile table
     lda mult8, y
-    clc 
+    clc
     adc iLevelTile                              ; and add the parameter offset (0 for color and 3 for mono)
     sta iLevelTile
 
@@ -127,7 +123,7 @@ loop:
     lda levelMasks, y                           ; and extract the masks for this tile
     tay
     lda masksLeft, y
-    sta colMaskL 
+    sta colMaskL
     lda masksRight, y
     sta colMaskR
 
@@ -154,7 +150,7 @@ loop:
 
     rts
 
-.endproc 
+.endproc
 
 
 ;-----------------------------------------------------------------------------
@@ -184,7 +180,7 @@ colorLoopLeft:
     dex                                         ; and do the next color for that instance
     bne colorLoopLeft                           ; repeat for all 4 color frames
     tya                                         ; move Y back 63 bytes, to the next white key byte
-    sec 
+    sec
     sbc #63
     tay
 
@@ -198,14 +194,14 @@ colorLoopRight:
     and masksRight, x
     sta keyAnimTiles, y
 
-    tya 
+    tya
     adc #TILE_BYTES
     tay
-    dex 
+    dex
     bne colorLoopRight
 
-    tya 
-    sec 
+    tya
+    sec
     sbc #63
     tay                                         ; y is now pointing at the next left byte
     cpy #TILE_BYTES                             ; see if the whole key has been processes
@@ -231,25 +227,25 @@ colorLoopRight:
 
     ldx currLevel
     lda conveyorDirections, x                   ; get a local copy of the conveyor direction
-    sta dir 
+    sta dir
 
     clc                                         ; point srcPtr at the conveyor tile
     lda #DATA_CONVEYOR - TILE_BYTES
     sta srcPtrL
-    lda #>tilesInstances 
+    lda #>tilesInstances
     sta srcPtrH
 
     lda #<conveyorAnimTiles                     ; point dstPtr at the first animated tile
     sta dstPtrL
-    lda #>conveyorAnimTiles 
+    lda #>conveyorAnimTiles
     sta dstPtrH
 
     ldy #TILE_BYTES - 1                         ; copy the tile to the animated tiles
 :
-    lda (srcPtrL), y 
+    lda (srcPtrL), y
     and #$7F                                    ; clear the MSB, will be fixed later
     sta (dstPtrL), y
-    dey 
+    dey
     bpl :-
 
     ldy #CONVEYOR_FRAMES - 1                    ; set a counter for how many frames to process
@@ -259,10 +255,10 @@ processTile:
 
     clc                                         ; move srcPtr to dstPtr (the new src)
     lda dstPtrL                                 ; and move dstPtr to the next frame to animate
-    sta srcPtrL 
+    sta srcPtrL
     adc #TILE_BYTES
     sta dstPtrL
-    lda dstPtrH 
+    lda dstPtrH
     sta srcPtrH
     bcc :+
     inc dstPtrH
@@ -276,7 +272,7 @@ processTile:
 
     lda dir                                     ; different algorithm for each direction
     cmp #2
-    beq left 
+    beq left
 
 right:
     ldy #0                                      ; top row
@@ -287,9 +283,9 @@ right:
 
 left:
     ldy #0
-    jsr shiftRight 
+    jsr shiftRight
     ldy #4
-    jsr shiftLeft 
+    jsr shiftLeft
 
 nextFrame:
     ldy frame
@@ -304,11 +300,11 @@ shiftRight:
     asl                                         ; shift 1/2 a pixel, bit 1 and 0 clear
     sta (dstPtrL), y                            ; save left shifted. carry has a pixel bit that needs to move
 
-    iny 
+    iny
     lda (dstPtrL), y
     rol                                         ; shift right byte once, carry goes in, MSB bit out in carry
     asl                                         ; shift second time, bit 0 is now a zero, carry bit needs moving left
-    sta (dstPtrL), y 
+    sta (dstPtrL), y
 
     dey
     lda #0                                      ; start fresh
@@ -329,7 +325,7 @@ shiftRight:
     ora (dstPtrL), y                            ; add to bit0 of left byte
     sta (dstPtrL), y                            ; and save
 
-    rts 
+    rts
 
 shiftLeft:
     ldx #1
@@ -339,20 +335,20 @@ shiftLeft:
     sta (dstPtrL), y                            ; save byte
 
     lda #0                                      ; move bit in for next byte to bit 6
-    ror 
-    lsr 
+    ror
+    lsr
     sta carry
-    iny 
+    iny
     lda (dstPtrL), y
     ror                                         ; move right byte one over (carry needs to go left now)
     ora carry                                   ; add bit from left
     sta (dstPtrL), y                            ; save
     lda #0                                      ; start fresh
     ror                                         ; move carry to bit 6
-    lsr 
-    dey 
+    lsr
+    dey
     ora (dstPtrL), y                            ; add to left byte
-    dex 
+    dex
     bpl :-
     sta (dstPtrL), y                            ; save
 
@@ -367,7 +363,7 @@ finalFix:
     lda #$80                                    ; if set, set color on for all frames
     ora conveyorAnimTiles, y
     sta conveyorAnimTiles, y
-    dey 
+    dey
     bpl :-
     bmi done
 
@@ -375,13 +371,13 @@ clear:
     lda #$7f                                    ; if not set, make sure color isn't on for all
     and conveyorAnimTiles, y
     sta conveyorAnimTiles, y
-    dey 
+    dey
     bpl clear
 
 done:
-    rts 
+    rts
 
-.endproc 
+.endproc
 
 ;-----------------------------------------------------------------------------
 ; Copy a pre-animated key tile into the tilesInstances so it looks as
@@ -404,13 +400,13 @@ done:
 :
     lda keyAnimTiles, x                         ; read the frame and write to key tile
     sta tilesInstances + DATA_KEY - TILE_BYTES, y
-    dex 
-    dey 
+    dex
+    dey
     bpl :-
 
-    rts 
+    rts
 
-.endproc 
+.endproc
 
 ;-----------------------------------------------------------------------------
 ; Copy a pre-animated conveyor lines over the lines in the conveyor frame tile,
@@ -428,14 +424,14 @@ done:
 
     lda conveyorAnimTiles, x                    ; copy the 4 animated bytes for
     sta tilesInstances + DATA_CONVEYOR - TILE_BYTES
-    
+
     inx
     lda conveyorAnimTiles, x                    ; instance 0 over
     sta tilesInstances + DATA_CONVEYOR - TILE_BYTES + 1
 
     inx                                         ; to the tile area 0
     inx
-    inx 
+    inx
     lda conveyorAnimTiles, x
     sta tilesInstances + DATA_CONVEYOR - TILE_BYTES + 4
 
@@ -443,6 +439,6 @@ done:
     lda conveyorAnimTiles, x
     sta tilesInstances + DATA_CONVEYOR - TILE_BYTES + 5
 
-    rts 
+    rts
 
-.endproc 
+.endproc
