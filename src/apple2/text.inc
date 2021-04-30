@@ -31,13 +31,16 @@ read:
     lda PLACEHOLDER, x                          ; get the character in the string
     sec
     sbc #32                                     ; the font only starts at space (char 32 or $20)
+    beq :+
+    sbc #9                                      ; gap after space
     asl                                         ; mult by 16 as that's how wide a char is in bytes
-    asl 
+    asl
     rol fontH
-    asl 
+    asl
     rol fontH
-    asl 
+    asl
     rol fontH                                   ; srcPtr now points at the char but $0000 based
+:
     adc #<font                                  ; add the font start
     sta fontL
     lda fontH
@@ -91,29 +94,29 @@ done:
 ; Macro that takes a lo and hi for the text with optional color and invert wanted
 ; sets up what's needed to call textShow which does the printing
 .macro printXYlh xpos, ypos, textL, textH, len, colorMask, inverse
-    
-    .local color, strIndex 
+
+    .local color, strIndex
 
     color    = dstPtrL                          ; textShow expects color masks in dstPtr(L and H)
     strIndex = sizeL
 
-    .ifblank colorMask 
+    .ifblank colorMask
         lda #$ff                                ; no color (white) is a mask of $ff left and right
-        sta color 
+        sta color
         sta color + 1
-    .else 
+    .else
         ldx colorMask                           ; this is an index into mask[Left|Right]
         lda masksLeft, x
-        sta color 
+        sta color
         lda masksRight, x
         sta color + 1
     .endif
 
     .ifblank inverse
         lda #0                                  ; eor o is not inverse
-    .else 
+    .else
         lda #$7f                                ; eor $7f inverts the color (leave MSB)
-    .endif 
+    .endif
 
     sta textSHowText::eorMask + 1               ; set the eor in the code
 
@@ -129,7 +132,7 @@ done:
     ldy ypos
     jsr textSHowText                            ; print that string
 
-.endmacro 
+.endmacro
 
 ;-----------------------------------------------------------------------------
 ; macro to take text address and split it into lo and hi (shorthand)
@@ -146,12 +149,12 @@ done:
     lda #0
     sta sizeL                                   ; index into string
     sta read + 2                                ; hi byte of string address
-    
+
     lda currLevel                               ; start with the level
     asl                                         ; multiply by 32
-    asl 
-    asl 
-    asl 
+    asl
+    asl
+    asl
     rol read + 2
     asl
     rol read + 2
@@ -177,13 +180,16 @@ read:
     lda PLACEHOLDER, x                          ; get the character in the string
     sec
     sbc #32                                     ; the font only starts at space (char 32 or $20)
+    beq :+                                      ; gap after space
+    sbc #9
     asl                                         ; mult by 16 as that's how wide a char is in bytes
-    asl 
+    asl
     rol srcPtrH
-    asl 
+    asl
     rol srcPtrH
-    asl 
+    asl
     rol srcPtrH                                 ; srcPtr now points at the char but $0000 based
+:
     adc #<font                                  ; add the font start
     sta srcPtrL
     lda srcPtrH
@@ -220,14 +226,14 @@ step:
     dec sizeH                                   ; done one line
     bne lrLoop                                  ; if any lines left, keep going
 
-    sec 
+    sec
     lda write + 1
     sbc #<((64*8)-2)
     sta write + 1
     lda write + 2
     sbc #>((64*8)-2)
     sta write + 2
-    clc 
+    clc
 
     inc sizeL                                   ; move to the next character in the string
     dec dstPtrL                                 ; see if 32 characters were done
@@ -236,7 +242,7 @@ step:
 done:
     rts
 
-.endproc 
+.endproc
 
 ;-----------------------------------------------------------------------------
 ; x has digit (5 means 1's, 4 means 10's, etc)
@@ -247,7 +253,7 @@ done:
     adc score, x                                ; get the current digit
     cmp #'9'+1                                  ; has it rolled over
     bcc okay                                    ; then simply increment
-    sec 
+    sec
     sbc #10
     sta score, x                                ; and save over the 9
     lda #1
@@ -255,7 +261,7 @@ done:
     bmi over                                    ; if it rolls over 999999
     cpx #1                                      ; if the digit is now the 010000 (1)
     bne textAddScore                            ; no, then work with this digit
-    ldy lives 
+    ldy lives
     cpy #9                                      ; max out at 9 lives (keeps cheat boot on-screen)
     bcs textAddScore
     inc lives                                   ; yes, then add a life
@@ -269,7 +275,7 @@ over:
 done:
     rts
 
-.endproc 
+.endproc
 
 ;-----------------------------------------------------------------------------
 .proc textCheckHighScore
@@ -285,14 +291,14 @@ done:
     bcc :-                                      ; x is 5 or less, keep checking digits
 
 done:
-    rts 
+    rts
 
 newHigh:
     ldx #5                                      ; copy the 6 score digits over the highscore digits
 :
-    lda score, x 
-    sta highScore, x 
-    dex 
+    lda score, x
+    sta highScore, x
+    dex
     bpl :-
     lda #UI_COMPONENT_HIGHSCORE
     jmp uiUpdateComponent
@@ -327,6 +333,6 @@ prntLoop:
     jmp prntLoop                                ;and print this character
 
 done:
-    rts 
+    rts
 
 .endproc
