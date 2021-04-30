@@ -9,26 +9,26 @@
 .segment "RODATA"
 
 roTextLevel:
-.byte "         Central Cavern         "
-.byte "          The Cold Room         "
-.byte "          The Menagerie         "
-.byte "   Abandoned Uranium Workings   "
-.byte "         Eugene's Lair          "
-.byte "       Processing Plant         "
-.byte "            The Vat             "
-.byte "Miner Willy meets the Kong Beast"
-.byte "        Wacky Amoebatrons       "
-.byte "       The Endorian Forest      "
-.byte "Attack of the Mutant Telephones "
-.byte " Return of the Alien Kong Beast "
-.byte "          Ore Refinery          "
-.byte "       Skylab Landing Bay       "
-.byte "            The Bank            "
-.byte "      The Sixteenth Cavern      "
-.byte "         The Warehouse          "
-.byte "      Amoebatrons' Revenge      "
-.byte "     Solar Power Generator      "
-.byte "        The Final Barrier       "
+.BYTE "         CENTRAL CAVERN         "
+.BYTE "          THE COLD ROOM         "
+.BYTE "          THE MENAGERIE         "
+.BYTE "   ABANDONED URANIUM WORKINGS   "
+.BYTE "         EUGENE+S LAIR          "
+.BYTE "       PROCESSING PLANT         "
+.BYTE "            THE VAT             "
+.BYTE "MINER WILLY MEETS THE KONG BEAST"
+.BYTE "        WACKY AMOEBATRONS       "
+.BYTE "       THE ENDORIAN FOREST      "
+.BYTE "ATTACK OF THE MUTANT TELEPHONES "
+.BYTE " RETURN OF THE ALIEN KONG BEAST "
+.BYTE "          ORE REFINERY          "
+.BYTE "       SKYLAB LANDING BAY       "
+.BYTE "            THE BANK            "
+.BYTE "      THE SIXTEENTH CAVERN      "
+.BYTE "         THE WAREHOUSE          "
+.BYTE "      AMOEBATRONS+ REVENGE      "
+.BYTE "     SOLAR POWER GENERATOR      "
+.BYTE "        THE FINAL BARRIER       "
 roTextAir:
 .byte "AIR  "
 roTextScore:
@@ -43,15 +43,15 @@ roTextPressEnter:
 .byte "PRESS ENTER TO START"
 roTextEnter := (roTextPressEnter + 6)
 roTextAppleIIVersion:
-.byte "Apple II  version by"
+.BYTE "APPLE II  VERSION BY"
 roTextStefan:
-.byte "Stefan Wessels, 2020"
+.BYTE "STEFAN WESSELS, 2020"
 roTextIntro:
-.byte ".  .  .  .  .  .  . MANIC MINER . . ", $7f, " BUG-BYTE ltd.  1983 . . By "
-.byte "Matthew Smith . . . Q, O & W, P = Left & Right . . Space = Jump . . M = Music "
-.byte "On/Off . . S = In Game Sound On/Off . . B = Monochrome/Color . . "
-.byte "C = Level scroll mode . . ESC = Quit . . . Guide Miner Willy through 20 lethal "
-.byte "caverns .  .  .  .  .  .  ", 0
+.BYTE ".  .  .  .  .  .  . MANIC MINER . . [ BUG-BYTE LTD.  1983 . . BY "
+.BYTE "MATTHEW SMITH . . . Q, O * W, P = LEFT * RIGHT . . SPACE = JUMP . . M = MUSIC "
+.BYTE "ON/OFF . . S = IN GAME SOUND ON/OFF . . B = MONOCHROME/COLOR . . "
+.BYTE "C = LEVEL SCROLL MODE . . ESC = QUIT . . . GUIDE MINER WILLY THROUGH 20 LETHAL "
+.BYTE "CAVERNS .  .  .  .  .  .  ", 0
 roTextMono:
 .byte " MONO"
 roTextColor:
