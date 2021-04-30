@@ -9,7 +9,7 @@
 .segment "CODE"
 
 ;-----------------------------------------------------------------------------
-.proc audioPlayTitleNote 
+.proc audioPlayTitleNote
 
     fixedDuration =  srcPtrL
     noteDuration  =  srcPtrH
@@ -48,7 +48,7 @@ play:
     sta freqTimer1
     ldx #11                                     ; delay about 20 clock cycles
 :
-    dex 
+    dex
     bne :-
 :
     dec freqTimer2                              ; dec timer 2
@@ -58,7 +58,7 @@ play:
     sta freqTimer2
     ldx #11                                     ; and waste 20 clock cycles
 :
-    dex 
+    dex
     bne :-
 :
     dec fixedDuration                           ; dec the fixed repeat count
@@ -75,7 +75,7 @@ leave:
     inc musicH
     clc                                         ; leave with carry clear
 :
-    rts 
+    rts
 
 reset:
     lda #<titleMusic                            ; played the whole tune
@@ -84,9 +84,9 @@ reset:
     sta musicH
 
     sec                                         ; and leave with carry set
-    rts 
+    rts
 
-.endproc 
+.endproc
 
 ;-----------------------------------------------------------------------------
 .proc audioPlayNote
@@ -95,22 +95,26 @@ reset:
 
     lda audioMask                               ; see if the music is on
     and #AUDIO_MUSIC
-    bne :+
-    rts                                         ; if not, return
+    bne play
+    
+    ldx #0                                      ; kill approx 6800 cycles (average cycles for playNote when on)
+:
+    nop                                         ; 2 cycles
+    nop                                         ; 4
+    nop                                         ; 6
+    nop                                         ; 8
+    nop                                         ; 10
+    nop                                         ; 12
+    nop                                         ; 14
+    nop                                         ; 16
+    nop                                         ; 18
+    nop                                         ; 20
+    nop                                         ; 22
+    dex                                         ; 24 cycles
+    bne :-                                      ; 26 cycles * 256 = 6656 cycles - close enough
+    rts
 
-:
-    lda #$FF                                    ; calculate a delay
-    sec                                         ; based on how many tiles were rendered
-    sbc tilesRendered                           ; this lets the music sound
-    cmp #80                                     ; better, esp. when a level is
-    bcc :+                                      ; very sparse (SkyLab for example)
-    lsr 
-    lsr
-    lsr
-    lsr 
-    tay 
-    jsr uiDelay::ySet
-:
+play:
     ldx musicL                                  ; get the index into the in-game music
     inc musicL                                  ; and advance that index
     lda inGameMusic, x                          ; get the note at the index
@@ -138,4 +142,4 @@ loop:
 
     rts                                         ; and return
 
-.endproc 
+.endproc
