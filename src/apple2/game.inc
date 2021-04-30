@@ -24,31 +24,37 @@ playLoop:
 
     lda demoMode                                ; check for demo mode
     beq :+                                      ; if not demo, move willy
-    jsr gameDemoTick                            ; tick the demo if demo mode
-    jmp :++                                     ; skip moving willy
+    jsr gameDemoTick                            ; demo mode so run demo
+    jmp ai                                      ; skip moving willy
 :
     jsr willyMove                               ; move the main character based on user input (or conveyor or gravity)
-:
+ai:
     jsr gameAI                                  ; run all the monster AI
-    
+
     ldx fullScreenClearCount                    ; get the flag for what level of screen clear is needed
     jsr screenClear                             ; and clear the screen
 
-    jsr tilesAnimateKeys                         ; copy the 16 bytes for the next "key" frame into place
+    jsr tilesAnimateKeys                        ; copy the 16 bytes for the next "key" frame into place
     jsr tilesAnimateConveyor                    ; update the conveyor tile
-    
+
     jsr screenDrawSprites                       ; draw all the enemies
 
     lda demoMode                                ; get the event state
-    bne :+                                      ; if so skip showing willy
+    beq :+                                      ; 0 - not demo, full flow
+    jsr screenDrawLevel                         ; show all the tiles in demo mode
+    jmp ui
+:
+    lda #$ff                                    ; Enable Collision detection
     jsr screenDrawWilly                         ; not demo - draw willy with collision detection
-    bcc :+                                      ; carry set is a collision, clear is no problem
+    bcc level                                   ; carry set is a collision, clear is no problem
     lda eventState                              ; on collision, set the die event
     ora #EVENT_DIED
     sta eventState
-:
+level:
     jsr screenDrawLevel                         ; show all the tiles
- 
+    lda #0                                      ; No collision detection
+    jsr screenDrawWilly                         ; Now draw willy over self and level, no collision
+ui:
     lda updateUICount                           ; see if the UI needs an update
     beq :+
     jsr uiUpdate                                ; if needed, update the appropriate UI components
@@ -59,6 +65,7 @@ playLoop:
 
     jsr screenSwap                              ; swap to the newly rendered screen
     jsr audioPlayNote                           ; play in-game music if needed
+    jsr gameDelay                               ; waste time to get all screens to run at same rate
 
     lda eventState                              ; see if any events fired
     beq playLoop                                ; keep looping while no events
@@ -77,13 +84,33 @@ playLoop:
     jsr textCheckHighScore                      ; game over - see if a new high score was set
     rts
 
+.endproc
+
+;-----------------------------------------------------------------------------
+.proc gameDelay
+
+    lda #$80                                    ; max tiles ever visible is $CD, but delay only up to $80
+    sec 
+    sbc tilesRendered                           ; how many were shown
+    bcc done                                    
+    tax                                         ; delta in x
+:
+    ldy #49                                     ; delay 246 cycles per non-rendered tile
+:
+    dey
+    bne :-
+    dex                                         ; and do it for all tiles not rendered (<$80)
+    bne :--
+done:
+    rts
+
 .endproc 
 
 ;-----------------------------------------------------------------------------
 .proc gameNewGame
 
     lda #START_LIVES                            ; init player number of lives
-    sta lives 
+    sta lives
 
     lda #LEVEL_Central_Cavern                   ; Init these game vars to 0
     sta currLevel
@@ -95,12 +122,12 @@ playLoop:
     lda #'0'                                    ; load a with '0'
 :
     sta score, x                                ; set all 6 score digits to '0'
-    dex 
+    dex
     bpl :-
 
-    rts 
+    rts
 
-.endproc 
+.endproc
 
 ;-----------------------------------------------------------------------------
 .proc gameInitStage
@@ -110,7 +137,7 @@ playLoop:
     instanceIdx = tmpBot + 2
 
     ldy currLevel                               ; Skip some stuff for "Game Over" pseudo-level
-    cpy #20 
+    cpy #20
     bcs notDemo
 
     jsr levelUnpack                             ; decompress a level to levelLayout
@@ -185,17 +212,17 @@ next:
     sta spriteXPos, x                           ; from 0 .. numSprites - 1
     lda sprites_y, y                            ; the addressing is unfortunate - sta ,x is zero-page 2 byte
     sta spriteYPos, x                           ; but it's not worth swapping x and y for this bit of code
-    lda sprites_min, y 
-    sta spriteMin, x 
-    lda sprites_max, y 
-    sta spriteMax, x 
-    lda sprites_speed, y 
-    sta spriteSpeed, x 
-    sta spriteTick, x 
-    lda sprites_dir, y 
-    sta spriteDir, x 
+    lda sprites_min, y
+    sta spriteMin, x
+    lda sprites_max, y
+    sta spriteMax, x
+    lda sprites_speed, y
+    sta spriteSpeed, x
+    sta spriteTick, x
+    lda sprites_dir, y
+    sta spriteDir, x
     lda sprites_class, y
-    sta spriteClass, x 
+    sta spriteClass, x
     lda sprites_colors, y                       ; get the color
     sta spriteColor, x
 
@@ -204,9 +231,9 @@ next:
 
     ldx instanceIdx                             ; restore y
     cpx numSprites
-    beq prep 
+    beq prep
 
-    lda spriteClass, x 
+    lda spriteClass, x
     bit bit1Mask                                ; CLASS_FOUR_FRAME
     beq :+
     lda #4
@@ -214,15 +241,15 @@ next:
 :
     lda #8
 :
-    adc spriteFramesIdx, x 
+    adc spriteFramesIdx, x
     sta spriteFramesIdx + 1, x
 
     ldy spriteIdx
     iny                                         ; next sprite in sprite table
     inx                                         ; next instance
-    dec count 
+    dec count
     beq prep
-    jmp next 
+    jmp next
 
 prep:
     ldx currLevel                               ; some levels need special handling
@@ -246,35 +273,35 @@ kong:
 
 :
     cpx #LEVEL_Skylab_Landing_Bay               ; skylab needs satellites to get X values
-    bne :+ 
+    bne :+
     ldx #2                                      ; init the falling satellites
 skyLabPos:
-    lda skylabXPos, x 
-    sta spriteXPos, x 
-    txa 
+    lda skylabXPos, x
+    sta spriteXPos, x
+    txa
     sta spriteTick, x
-    dex 
+    dex
     bpl skyLabPos
 
 :
     cpx #LEVEL_The_Final_Barrier
-    bne fixDoor 
+    bne fixDoor
     dec numSprites                              ; hide the victory door sprite
 
 fixDoor:
     jmp spriteDoorSetup                         ; sprites are set up - door is special
 
-.endproc 
+.endproc
 
 ;-----------------------------------------------------------------------------
-.proc gameAI 
+.proc gameAI
 
     lda fullScreenClearCount                    ; get the state
     beq :+                                      ; if it's zero, move on
     dec fullScreenClearCount                    ; count this down
 :
     dec airFlow                                 ; deal with the air countdown. airFlow is "time" counter
-    bne airDone 
+    bne airDone
     jsr gameAirDecrease
 
 airDone:
@@ -326,7 +353,7 @@ right:
     lda #0                                      ; no, reset
     sta spriteFrame, x                          ; frame to 0
     beq next                                    ; BRA. done with this sprite
-rightEnd: 
+rightEnd:
     dec spriteXPos, x                           ; set back to last valid x
     lda #1                                      ; load left
     sta spriteDir, x                            ; and set direction left
@@ -339,7 +366,7 @@ fix4:
     beq next                                    ; if not, done with this sprite (frame 7 is good)
     lda #3                                      ; drop the 7 to 3
     sta spriteFrame, x                          ; set the frame
-    jmp next 
+    jmp next
 
 left:
     dec spriteFrame, x                          ; move the frame
@@ -375,12 +402,12 @@ postVMove:
 :
     bit CLASS_SKYLAB                            ; skylab
     beq :+
-    jmp skylab 
+    jmp skylab
 :
     inc spriteFrame, x                          ; otherwise go to next frame
-    lda spriteFrame, x 
+    lda spriteFrame, x
     and #3
-    sta spriteFrame, x 
+    sta spriteFrame, x
 
 next:
     dex                                         ; get previous sprite
@@ -389,15 +416,15 @@ next:
 
 goTop:
     jmp loop
-    
+
 vertical:
     lda spriteDir, x                            ; get direction 1 = UP, 0 = DOWN
-    beq down 
+    beq down
     bmi postVMove                               ; if the spriteDir is lt $ff, stationary sprite
 
 up:
     lda spriteYPos, x                           ; get the Y position
-    sec 
+    sec
     sbc spriteSpeed, x                          ; move up by the speed
     cmp spriteMin, x                            ; see if at top
     bcc upEnd                                   ; overshot top
@@ -414,7 +441,7 @@ upEnd:
 
 down:
     lda spriteYPos, x                           ; get the Y
-    clc 
+    clc
     adc spriteSpeed, x                          ; add the speed
     cmp spriteMax, x                            ; see of at end
     bcs downEnd                                 ; at or past end
@@ -426,11 +453,11 @@ downEnd:
     bit CLASS_HOLDATEND
     bne stop
     lda #1                                      ; but mark for moving UP (1)
-    sta spriteDir, x 
+    sta spriteDir, x
     bne postVMove                               ; BRA maybe down?
 stop:
     lda #$ff                                    ; set the direction to -1 (lt 0)
-    sta spriteDir, x 
+    sta spriteDir, x
     bne postVMove                               ; BRA
 
 door:
@@ -452,14 +479,14 @@ eugene:
     lda #0                                      ; all keys - force eugene down
     sta spriteDir, x
     inc spriteFrame, x                          ; cycle through the 5 colors
-    lda spriteFrame, x 
+    lda spriteFrame, x
     cmp #4
     bcc :+
     lda #0
 :
     sta spriteFrame, x                          ; save the new frame
 eugeneNormal:
-    jmp next 
+    jmp next
 
 kong:
     lda spriteMax, x                            ; if kong's max is 0 he's still up
@@ -493,16 +520,16 @@ skylab:
     lda spriteDir, x                            ; get the direction of the falling satellite
     cmp #$ff                                    ; see if it's reached its end
     beq :+                                      ; yes it has
-    jmp next 
+    jmp next
 :
     inc spriteFrame, x                          ; advance the collapsing frame
     lda spriteFrame, x                          ; load that frame
     cmp #8                                      ; see if it's the last
     bcs :+                                      ; yes
-    jmp next 
+    jmp next
 :
     lda spriteTick, x                           ; get the tick (hich is an index in this case)
-    clc 
+    clc
     adc #3                                      ; advance by 3 (3 satellites at a time) so next index for this satellite
     cmp #12                                     ; (3*4 is 12) - there are 4 stating locations per satellite
     bcc :+                                      ; not rolled over
@@ -513,12 +540,12 @@ skylab:
     lda skylabXPos, y                           ; get the actual start position, based on y, for this satellite
     sta spriteXPos, x                           ; put that into the satellite
     lda #0                                      ; reset the frame, position and direction all to 0
-    sta spriteFrame, x 
-    sta spriteYPos, x 
-    sta spriteDir, x 
-    jmp next 
+    sta spriteFrame, x
+    sta spriteYPos, x
+    sta spriteDir, x
+    jmp next
 
-.endproc 
+.endproc
 
 
 ;-----------------------------------------------------------------------------
@@ -531,16 +558,16 @@ skylab:
     lda #UI_COMPONENT_NAME                      ; mark the level name as needing an update
     jsr uiUpdateComponent
     lda leftEdge                                ; scroll the screen
-    clc 
+    clc
     adc demoDirection                           ; based on the scrolling direction
-    sta leftEdge 
+    sta leftEdge
     beq nextDemoLevel                           ; if the edge is 0 then done with level
     cmp #12                                     ; at 12, the level flips scroll direction
     bne :+
     lda #$ff                                    ; at 12, the scroll direction becomes -1
     sta demoDirection
 :
-    rts 
+    rts
 
 nextDemoLevel:
     lda #DEMO_TIMER_INITAL                      ; set for a longer initial hold at a new level
@@ -554,7 +581,7 @@ nextDemoLevel:
     sta eventState
     rts
 
-.endproc 
+.endproc
 
 ;-----------------------------------------------------------------------------
 .proc gameEvent
@@ -569,7 +596,7 @@ nextDemoLevel:
     lda #EVENT_LEVEL_RESTART                    ; still alive so restart the level
     rts
 
-: 
+:
     bit bit4Mask                                ; EVENT_CHEAT_JUMP
     bne done                                    ; if jumping, just go
     lda currLevel                               ; check the level
@@ -591,7 +618,7 @@ nextDemoLevel:
     sta tmpBot
     jsr screenInvertVisibleScreen
     ldx sizeL
-    dex 
+    dex
     bne :-
 
     lda demoMode                                ; is this demo mode
@@ -610,7 +637,7 @@ airLoop:
     jsr gameAirDecrease                         ; run the decrease air
     lda airCols                                 ; get the remaining bar length
     asl                                         ; mult * 4
-    asl 
+    asl
     eor #$7f                                    ; and reverse (ignore MSB which is 0) - this is the freq
     ldy #6                                      ; duration for the freq
     jsr audioPlayNote::freq                     ; make a sound of this freq and duration
@@ -637,9 +664,9 @@ died:
 
 done:
     lda #EVENT_NEXT_LEVEL                       ; return in a the action (next level)
-    rts 
-    
-.endproc 
+    rts
+
+.endproc
 
 ;-----------------------------------------------------------------------------
 .proc gameAirDecrease
@@ -657,7 +684,7 @@ done:
     cmp maskGreen, x                            ; if it's all green, time to drop another column
     beq colDec
     lsr                                         ; not all green, so adjust the tip by dropping 2 bits (1 white pixel)
-    lsr 
+    lsr
     ora maskGreenHi, x                          ; and replace that with a green pixel (appropriate for odd/even column)
     bne airOk
 
@@ -689,7 +716,7 @@ airOk:
 bootPart:
     ldx #20                                     ; game over level is 20 (0 based)
     stx currLevel
-    jsr gameInitStage 
+    jsr gameInitStage
 
     ldx #0                                      ; clear the top part of the screen
     jsr screenClear
@@ -702,7 +729,7 @@ bootPart:
 
     lda #1                                      ; pretend there's a key so Boot (EUGENE) doesn't animate
     sta keysToCollect                           ; and the "door" doesn't switch to the second frame
-   
+
     tax                                         ; also draw the pedestal (door)
     jsr screenDrawSprite                        ; draw the boot
 
@@ -717,11 +744,11 @@ bootLoop:
 
     dec iter                                    ; raise freq
     dec iter
-    
+
     lda audioMask                               ; see if the audio will play or skip
-    and #AUDIO_SOUND 
+    and #AUDIO_SOUND
     beq otherDelay                              ; audio won't delay so "fake" an audio delay
-    
+
     lda iter                                    ; get the freq
     ldy #$80                                    ; duration for the freq (also slows the boot down)
     jsr audioPlayNote::freq                     ; make a sound of this freq and duration
@@ -729,8 +756,8 @@ bootLoop:
 
 otherDelay:
     lda iter
-    lsr 
-    lsr 
+    lsr
+    lsr
     tay
     jsr uiDelay::ySet
 :
@@ -748,7 +775,7 @@ gameOverPart:
     textL = tmpBot + 4                          ; string pointer
     textH = tmpBot + 5
     len   = tmpBot + 6                          ; how many characters (0 based)
-    
+
     lda #$20
     sta iter                                    ; how many times to loop
     lda #(7*8)                                  ; Y for string
@@ -757,9 +784,9 @@ gameOverPart:
     sta color
 cycleLoop:
     lda #4                                      ; print GAME at x 4
-    sta xPos 
+    sta xPos
     lda #<roTextGame                            ; point at GAME text
-    sta textL 
+    sta textL
     lda #>roTextGame
     sta textH
     lda #4                                      ; 0-3 characters
@@ -767,9 +794,9 @@ cycleLoop:
     jsr textColorCycle                          ; show the text in color
 
     lda #13                                     ; print OVER at x 13
-    sta xPos 
+    sta xPos
     lda #<roTextOver                            ; point at OVER text
-    sta textL 
+    sta textL
     lda #>roTextOver
     sta textH
     lda #4                                      ; also 0-3 characters in length
@@ -791,7 +818,7 @@ cycleLoop:
     lda #19                                     ; put willy above the door
     sta willyXPos                               ; outside the caverns
     lda #0
-    sta willyFrame 
+    sta willyFrame
     lda #2*8
     sta willyYPos
 
@@ -802,7 +829,7 @@ cycleLoop:
     jsr screenDrawWilly                         ; not demo - draw willy with collision detection
     jsr screenDrawLevel                         ; show all the tiles
     ldx numSprites                              ; The door's index
-    inx 
+    inx
     jsr screenDrawSprite                        ; render the door over everything else, no collision
     jsr screenSwap                              ; swap to the newly rendered screen
 
@@ -812,10 +839,10 @@ audioPart:
     iteration = tmpBot + 2                      ; iteration
 
     lda #50                                     ; 50 iterations
-    sta iteration 
+    sta iteration
     lda #0                                      ; init freq and duration
-    sta freq 
-    sta duration 
+    sta freq
+    sta duration
 
 loop:
     lda duration                                ; start with the duration
@@ -833,7 +860,7 @@ loop:
 :
     dex                                         ; but I want the audio code to all go through the
     bne :-                                      ; same "API" for consistency
-    dey 
+    dey
     bne :--
     beq postFreq
 
@@ -844,6 +871,6 @@ audioOn:
 postFreq:
     dec iteration                               ; dec the iterations
     bne loop                                    ; loop till all iterations done
-    rts 
+    rts
 
-.endproc 
+.endproc
