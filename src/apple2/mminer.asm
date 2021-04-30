@@ -23,7 +23,7 @@ loop:
 
 quit:
     jsr MLI                                     ; quit using the prodos mli
-  
+
     .byte   $65                                 ; ProDOS Quit request
     .addr   * + 2
     .byte   4
@@ -69,7 +69,7 @@ quit:
     sta cheatActive
     sta cheatIndex
     sta monochrome
- 
+
     lda #AUDIO_MUSIC | AUDIO_SOUND              ; turn the music and in-game sounds on
     sta audioMask
 
@@ -84,6 +84,6 @@ quit:
     dex
     bpl :-
 
-    rts 
+    rts
 
-.endproc 
+.endproc

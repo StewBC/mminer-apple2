@@ -20,7 +20,7 @@
     willyFrameBackup = tmpBot + 3
     willyFloor       = tmpBot + 4
 
-    lda movementMask 
+    lda movementMask
     bit bit2Mask                                ; MASK_AIR
     beq checkHorzKeys                           ; on ground - check horizontal keys
     jmp selectDirection                         ; in air - check horizontal motion
@@ -64,7 +64,7 @@ left:
     lda #0                                      ; when turning, no direction
     sta movementMask
     lda #1                                      ; was facing right, so turn around
-    sta willyDir 
+    sta willyDir
     lda willyFrame                              ; flip the facing frame to left
     ora #4
     sta willyFrame
@@ -97,7 +97,7 @@ right:
     sta movementMask                            ; and clear the movement mask
     lda willyFrame
     and #3                                      ; set right facing frame
-    sta willyFrame 
+    sta willyFrame
     jmp vertical
 
 moveRight:
@@ -171,16 +171,16 @@ vertMove:
     lsr                                         ; / 2
     sec
     sbc #4                                      ; -4, so -4, -4, -3, -3, -2, -2, -1, -1, 0, 0, 1, 1, 2, 2, 3, 3, 4, 4
-    clc 
+    clc
     adc willyYPos                               ; adjust willy height
     sta willyYPos
-    
+
     ldx willyJumpCounter                        ; get the current jump counter for height calculation
-    lda jumpFreq, x 
+    lda jumpFreq, x
     ldy #$08                                    ; duration for the freq
     jsr audioPlayNote::freq                     ; make a sound of this freq and duration
     inc willyJumpCounter
-    
+
     lda willyJumpCounter
     cmp #9
     bcs willyCollisionFeet                      ; and move the jump counter along
@@ -213,7 +213,7 @@ falling:
     lda willyJumpCounter                        ; get the current jump counter for height calculation
     and #$0f
     tax
-    lda fallFreq, x 
+    lda fallFreq, x
     ldy #$08                                    ; duration for the freq
     jsr audioPlayNote::freq                     ; make a sound of this freq and duration
     inc willyJumpCounter                        ; and move the jump counter along
@@ -222,7 +222,7 @@ falling:
     and #<~(MASK_LEFT | MASK_RIGHT)
     sta movementMask
     lda willyYPos                               ; get willy's height
-    clc 
+    clc
     adc #4                                      ; move him 4 down (fall speed)
     sta willyYPos
 
@@ -269,7 +269,7 @@ checkFloor:
     and #<~(MASK_LEFT | MASK_RIGHT)             ; clear left and right
     ora #MASK_AIR                               ; set the mask that he's now in the air (fall)
     sta movementMask
-  
+
 
 positionScreen:                                 ; this is also called from gameInitStage
     lda cameraMode                              ; see which "camera mode" is active
@@ -281,7 +281,7 @@ camera3Zone:                                    ; zone 1: 0-19, 2: 6-25, 3: 12-3
     bcs zone2or3                                ; ge 10 means zone 2 or 3
     lda leftEdge                                ; zone 1 - see where the edge is
     cmp #0                                      ; if it's at 0 all is well
-    beq done 
+    beq done
 cameraLess:
     dec leftEdge                                ; edge is gt 0, so move it left
     bpl moveName                                ; BRA
@@ -304,13 +304,13 @@ moveName:                                       ; if the edge moves the text nee
     lda #UI_COMPONENT_NAME                      ; and mark the name as needing to scroll too
     jsr uiUpdateComponent
 
-    rts 
+    rts
 
 cameraScroll:
     lda willyXPos
     sec                                         ; col is in accumulator
     sbc #$0a                                    ; see if willy is past column 10
-    bcs :+ 
+    bcs :+
     lda #0                                      ; not, so set the left edge to the left
     bne :++                                     ; BRA
 :
@@ -333,9 +333,9 @@ done:
 ; from willyFloorCollision.  on exit, carry set means wall collision
 .proc willyWorldCollision
 
-    clc 
+    clc
     cmp #DATA_BUSH                              ; bushes kill willy
-    beq willyDies 
+    beq willyDies
     cmp #DATA_ROCK                              ; rocks kill willy
     bne :+
 
@@ -377,7 +377,7 @@ done:
     clc                                         ; for unhandled (floor tiles), just clear carry
     rts
 
-.endproc 
+.endproc
 
 ;-----------------------------------------------------------------------------
 .proc willyFloorCollision
@@ -427,16 +427,16 @@ notFromAir:
     jsr willyCollapse                           ; collapse a platform tile, returns with carry clear
     bcc landed                                  ; BRA to land code
 
-.endproc 
+.endproc
 
 ;-----------------------------------------------------------------------------
 .proc willyHitSwitch1
 
-    clc 
+    clc
     adc #1                                      ; DATA_SWITCH1 becomes DATA_SWITCH1_OPEN
     sta (srcPtrL), y                            ; make this switch draw open
-    
-    lda #0 
+
+    lda #0
     sta levelLayout+11*32+17                    ; make a hole in the wall
     sta levelLayout+12*32+17
 
@@ -445,14 +445,14 @@ notFromAir:
 extend:
     sta spriteMax, x                            ; make the new max active
     clc                                         ; must leave with carry clear - not a wall collision
-    rts 
+    rts
 
 .endproc
 
 ;-----------------------------------------------------------------------------
 .proc willyHitSwitch2
 
-    clc 
+    clc
     adc #1                                      ; DATA_SWITCH2 becomes DATA_SWITCH2_OPEN
     sta (srcPtrL), y                            ; make this switch draw open
 
@@ -462,7 +462,7 @@ extend:
 
     ldx #3                                      ; kong is at index 3
     lda #14*8-5                                 ; put the fallen-down destination for kong in place
-    sta spriteMax, x 
+    sta spriteMax, x
 
     lda #2                                      ; turn kong upside down
     sta spriteFrame, x
@@ -470,9 +470,9 @@ extend:
     lda #0                                      ; set kong's direction to down
     sta spriteDir, x
 
-    rts 
+    rts
 
-.endproc 
+.endproc
 
 ;-----------------------------------------------------------------------------
 .proc willyCollapse
@@ -485,7 +485,7 @@ extend:
     clc
 :
     sta (srcPtrL), y                            ; make the change in the level
-    rts 
+    rts
 
 .endproc
 
@@ -515,7 +515,7 @@ putDoor:
  done:
     ldx tempX                                   ; restore the saved x
     clc                                         ; make sure carry is clear
-    rts 
+    rts
 
 .endproc
 
@@ -524,11 +524,11 @@ putDoor:
 
     lda willyYPos                               ; get the height
     lsr                                         ; divide by 8
-    lsr 
+    lsr
     lsr
     sta willyYRow                               ; save the row willy's in
     tax                                         ; put the row in Y
-    clc 
+    clc
     lda mult32L, x                              ; row * 32
     adc willyXPos                               ; and add the X position (levelLayout is aligned so no need to add lo)
     sta srcPtrL                                 ; the low byte of the pos in the level
@@ -536,6 +536,6 @@ putDoor:
     adc #>levelLayout                           ; and offset into the level
     sta srcPtrH                                 ; and now srcPtr points at willy in the level
 
-    rts 
+    rts
 
 .endproc

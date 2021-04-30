@@ -18,31 +18,31 @@
 
     ldy #0
 hiCopy:
-    dec sizeH 
+    dec sizeH
     bmi lowCopy
 :
     lda (srcPtrL), y
     sta (dstPtrL), y
-    dey 
+    dey
     bne :-
-    inc srcPtrH 
+    inc srcPtrH
     inc dstPtrH
     bne hiCopy
 
 lowCopy:
     ldy sizeL
-    dey 
+    dey
     bmi done
 :
     lda (srcPtrL), y
     sta (dstPtrL), y
-    dey 
+    dey
     bpl :-
 
 done:
-    rts 
+    rts
 
-.endproc 
+.endproc
 
 ;-----------------------------------------------------------------------------
 ; Look up the color, and apply those masks to the frames
@@ -61,8 +61,8 @@ done:
     tay                                         ; put color index in y
 
     lda masksLeft, y                            ; look up the masks for the color
-    sta colMaskL 
-    lda masksRight, y 
+    sta colMaskL
+    lda masksRight, y
     sta colMaskR
 
     lda mult64L, x                              ; build a pointer to the frame
@@ -70,10 +70,10 @@ done:
     lda mult64H, x
     adc #>spriteInstances
     sta srcPtrH
-    
+
     ldy numFrames                               ; convert frames to bytes
-    lda mult64H, y 
-    sta sizeH 
+    lda mult64H, y
+    sta sizeH
     lda mult64L, y
     sta sizeL
 
@@ -85,32 +85,32 @@ hiPass:
     lda (srcPtrL), y                            ; do a left hand byte
     and colMaskL
     sta (srcPtrL), y
-    dey 
+    dey
     lda (srcPtrL), y                            ; then a right hand byte
     and colMaskR
     sta (srcPtrL), y
-    dey 
+    dey
     bne :-                                      ; for 256 bytes
     inc dstPtrH                                 ; advance the dest ptr Hi
     bne hiPass                                  ; BRA
 
-lowPass: 
+lowPass:
     ldy sizeL                                   ; do bytes remaining lt 256
-    dey 
+    dey
     bmi done                                    ; keep going till all done
 :
     lda (srcPtrL), y
     and colMaskL
     sta (srcPtrL), y
-    dey 
+    dey
     lda (srcPtrL), y
     and colMaskR
     sta (srcPtrL), y
-    dey 
+    dey
     bpl :-
 
 done:
-    rts 
+    rts
 
 .endproc
 
@@ -125,29 +125,29 @@ done:
     originalFrame    = tmpBot + 4
     newFrame         = tmpBot + 5
 
-    clc 
+    clc
 
     ldx originalFrame                           ; point srcPtr at the original frame
     lda mult64L, x
     sta srcPtrL
-    lda mult64H, x 
+    lda mult64H, x
     adc #>spriteInstances
     sta srcPtrH
 
     ldx newFrame                                ; point dstPtr at the target frame
     lda mult64L, x
     sta dstPtrL
-    lda mult64H, x 
+    lda mult64H, x
     adc #>spriteInstances
     sta dstPtrH
 
     lda #0                                      ; 256 or less bytes (no Hi)
-    sta sizeH 
+    sta sizeH
     lda #64                                     ; just 64 bytes to copy
     sta sizeL
     jsr spriteCopyMemSrcToDst                   ; use copymem to copy a 64 byte frame
 
-    rts 
+    rts
 
 .endproc
 
@@ -157,7 +157,7 @@ done:
 ; x = frame number
 .proc spriteInvertFrame
 
-    clc 
+    clc
     lda mult64L, x                              ; make srcPtr point at the frame
     sta srcPtrL
     lda mult64H, x
@@ -172,7 +172,7 @@ done:
     dey                                         ; one less byte to do
     bpl :-                                      ; do for all bytes
 
-    rts 
+    rts
 
 .endproc
 
@@ -203,7 +203,7 @@ done:
     dey                                         ; previous byte in frame
     bpl :-                                      ; do for all, incl. zero'th byte
 
-    rts 
+    rts
 
 .endproc
 
@@ -278,8 +278,8 @@ copyFrames:
     lda (srcPtrL), y                            ; get a (left) src byte at the source index
     pha                                         ; save so the right nibble can be expanded later
     lsr                                         ; make the left nibble the low nibble
-    lsr 
-    lsr 
+    lsr
+    lsr
     lsr
     tax                                         ; put the value in x
     lda binDouble, x                            ; look up the "pixel doubled" value
@@ -307,7 +307,7 @@ copyFrames:
     bne copyFrames                              ; do max 256 bytes = 8 * 32 byte src frames
 
 done:
-    rts 
+    rts
 
 .endproc
 
@@ -320,33 +320,33 @@ done:
 
     ldx numSprites                              ; numSprites is the door sprite index
     lda spriteFramesIdx, x
-    tax 
+    tax
     stx originalFrame
-    inx 
+    inx
     stx newFrame
     jsr spriteCopyFrameToFrame                  ; make a copy y = instanceIdx, a = srcFrame, x = dstFrame
 
-    ldx newFrame 
+    ldx newFrame
     jsr spriteInvertFrame                       ; invert the instance frame bits (leave msb alone)
 
     ldx currLevel
-    lda door_color1, x 
+    lda door_color1, x
     beq :+
     ldx originalFrame
     ldy #1
     jsr spriteApplyMaskToFrames
 
     ldx currLevel
-    lda door_color2, x 
+    lda door_color2, x
     beq :+
     ldx newFrame
     ldy #1
     jmp spriteApplyMaskToFrames
 
 :
-    rts 
+    rts
 
-.endproc 
+.endproc
 
 ;-----------------------------------------------------------------------------
 ; Make 4 copies of Eugene frame 0 into frames 1-4 and apply a different
@@ -369,7 +369,7 @@ done:
     stx count
 :
     jsr spriteCopyFrameToFrame                  ; make a copy of eugene, x = ori, y = new
-    
+
     lda count                                   ; get the count in a (as a color mask index)
     ldx newFrame                                ; the frame in x
     ldy #1                                      ; and the number of frames to process in Y

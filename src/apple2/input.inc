@@ -26,18 +26,18 @@ hasKey:
     bit KBDSTRB
     and #$5f                                    ; strip MSB and upper/lower case (to upper)
 
-    tax 
+    tax
     lda demoMode
-    beq :+ 
+    beq :+
     jmp premusic
 :
-    txa 
+    txa
     bne right                                   ; $5f clears space so a is 0 for jump
 
 jump:
     lda userKeyMask
     eor #MASK_AIR                               ; AIR marks the start of a jump
-    sta userKeyMask 
+    sta userKeyMask
     rts
 
 right:
@@ -71,7 +71,7 @@ camera:
     eor cameraMode
     sta cameraMode
     rts                                         ; done, can't be any other key
-    
+
 cheat:
     ora #%00100000                              ; make "normal" characters
     ldx cheatActive                             ; see if the cheat mode is on
@@ -113,7 +113,7 @@ checkJump:
     bcc :+
     lda #0
 :
-    sta currLevel 
+    sta currLevel
 setJmpEvent:
     lda #EVENT_CHEAT_JUMP                       ; set the jump event active
     ora eventState
@@ -138,7 +138,7 @@ music:
     LDA audioMask
     eor #AUDIO_MUSIC
     sta audioMask
-    rts 
+    rts
 
 :
     cmp #'B'
@@ -154,7 +154,7 @@ music:
     LDA audioMask
     eor #AUDIO_SOUND
     sta audioMask
-    rts 
+    rts
 
 :
     cmp #$1B                                    ; ESC
@@ -165,15 +165,15 @@ music:
 
 quit:
     lda #0                                      ; set lives to zero so this die event quits
-    sta lives 
+    sta lives
     inc demoMode                                ; turn demo mode if not on, so there's no end-of-level stuff
     lda eventState                              ; and make a death event
     ora #EVENT_DIED
     sta eventState
 
 done:
-    rts 
-    
+    rts
+
 .endproc
 
 ;-----------------------------------------------------------------------------
@@ -212,20 +212,20 @@ showMono:
 showColor:
     printXY #7, #(17*8), roTextColor, #4        ; show Color on in both buffers
     jsr screenSwap::valueSwap
-    dec currLevel 
+    dec currLevel
     bpl showColor
 doneB:
     lda #0                                      ; if all is well, return with 0 in a
-    rts 
+    rts
 
 :                                               ; non-music/color toggle key
     cmp #$1b                                    ; see if it's esc
     beq exit                                    ; exit if it is
 stop:
     lda #1                                      ; non-M, B or ESC (non toggle) returns 1 (start game)
-    rts 
+    rts
 exit:
     lda #$ff                                    ; -1 on ESC (quit application)
     rts
 
-.endproc 
+.endproc

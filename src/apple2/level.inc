@@ -37,9 +37,9 @@ loop:
     iny                                         ; point y at next byte
 
     lsr                                         ; get high repeat nibble into low nibble
-    lsr 
-    lsr 
-    lsr 
+    lsr
+    lsr
+    lsr
     tax                                         ; but result in X
 
     lda (srcPtrL), y                            ; read the next byte from level (values)
@@ -47,9 +47,9 @@ loop:
     iny                                         ; advance y to next rep counts
 
     lsr                                         ; get high value nibble into low nibble
-    lsr 
-    lsr 
-    lsr 
+    lsr
+    lsr
+    lsr
     jsr :+                                      ; store value repeat times into level decode area
 
     pla                                         ; restore the rep byte
@@ -73,7 +73,7 @@ store:
     bpl store                                   ; repeat for all repetitions
 
     lda len                                     ; get the repeat length
-    clc 
+    clc
     adc store + 1                               ; advance the stor pointer by the length
     sta store + 1
     bcc done

@@ -16,9 +16,9 @@
     lda #2
     sta updateUICount
 
-    rts 
+    rts
 
-.endproc 
+.endproc
 
 ;-----------------------------------------------------------------------------
 .proc uiUpdate
@@ -66,13 +66,13 @@
     lda #0
     sta uiComponent
 :
-    rts 
-    
-.endproc 
+    rts
+
+.endproc
 
 ;-----------------------------------------------------------------------------
 ; 28209 cycle delay from start till after rts
-.proc uiDelay 
+.proc uiDelay
 
     ldy #$80
 ySet:
@@ -80,12 +80,12 @@ ySet:
 :
     dex
     bne :-
-    dey 
+    dey
     bne :-
 
     rts
-     
-.endproc 
+
+.endproc
 
 ;-----------------------------------------------------------------------------
 ; This routine shows the MANIC and MINER text on screen.
@@ -108,29 +108,29 @@ ySet:
     dc       = tmpBot + 4
     dw       = tmpBot + 5
     pr       = tmpBot + 6
-    
-    sty row 
+
+    sty row
     stx col
     lda #0
-    sta offset 
-    sta index 
+    sta offset
+    sta index
 
 strLoop:
     ldx index
 colorLoc:
     lda PLACEHOLDER, x                          ; unpack the color masks
-    tay 
-    lda masksLeft, y 
+    tay
+    lda masksLeft, y
     sta colMaskL
-    lda masksRight, y 
+    lda masksRight, y
     sta colMaskR
     lda #6                                      ; the text is 6 rows high
-    sta height 
-    lda row 
+    sta height
+    lda row
     sta dr                                      ; set the working counter to the row
 
 charLoop:
-    lda col 
+    lda col
     sta dc                                      ; set the working counter to the column
     ldx index                                   ; get the index to the character in the string
 widthLoc:
@@ -151,12 +151,12 @@ colLoop:
     sta pr                                      ; save row draw counter
     lda dr                                      ; load the screen draw row where drawing should happen
     asl                                         ; * 8
-    asl 
+    asl
     asl
     tay                                         ; store the row in Y
     lda dc                                      ; get the column
     and #1                                      ; and see if the column is odd or even (for color mask)
-    tax 
+    tax
 :
     lda dc                                      ; start with the column
     adc rowL, y                                 ; and calculate the hi-res row/col address
@@ -180,8 +180,8 @@ skipPlot:
     dec height                                  ; one less row to do
     bpl charLoop                                ; keep going till the whole character height done
     lda width                                   ; move the draw col by the width of the character just drawn
-    clc 
-    adc col 
+    clc
+    adc col
     sta col
     inc index                                   ; and move the string index to the next character
     lda index
@@ -189,25 +189,25 @@ skipPlot:
     bcc strLoop                                 ; if not all 5 characters (MANIC or MINER) done, keep going
 
     rts
-    
-.endproc 
+
+.endproc
 
 ;-----------------------------------------------------------------------------
 ; Prep uiShowMMText internal variables with data relevant for the
 ; specific text the macro is called with
-.macro uiShowMMTextXY column, row, data, widths, colors 
+.macro uiShowMMTextXY column, row, data, widths, colors
 
     lda #<data                                  ; MANIC or MINER bit-arrays
     sta uiShowMMText::dataLoc + 1
-    lda #>data 
+    lda #>data
     sta uiShowMMText::dataLoc + 2
-    lda #<widths 
+    lda #<widths
     sta uiShowMMText::widthLoc + 1              ; array of letter-widths in MANIC or MINER
-    lda #>widths 
+    lda #>widths
     sta uiShowMMText::widthLoc + 2
     lda #<colors                                ; array of letter colors in the words
     sta uiShowMMText::colorLoc + 1
-    lda #>colors 
+    lda #>colors
     sta uiShowMMText::colorLoc + 2
     ldx column                                  ; screen location passed in x/y
     ldy row
@@ -231,7 +231,7 @@ skipPlot:
     lda #11*8                                   ; position willy for the UI
     sta willyYPos
     lda #0
-    sta willyFrame 
+    sta willyFrame
     lda #18
     sta willyXPos
 
@@ -273,7 +273,7 @@ mainLoop:
     beq stayInUI                                ; no key
     bpl playGame                                ; go to game
     lda #EVENT_EXIT_GAME                        ; quit
-    bne exit 
+    bne exit
 playGame:
     lda #EVENT_OK
 exit:
@@ -319,26 +319,26 @@ introScroll:                                    ; show the scrolling message
     lda #16                                     ; 16 rows from his Y
     sta sizeL                                   ; track rows in sizeL
 :
-    clc 
+    clc
     lda willyXPos                               ; start with his X
     asl                                         ; * 2 for screen coordinates
     adc rowL, y                                 ; get the hires coordinates
     sta writeZero + 1
-    lda rowH, y 
+    lda rowH, y
     adc currPageH
     sta writeZero + 2
     lda #0                                      ; write 4 zero-bytes to each row
     ldx #3
 writeZero:
-    sta PLACEHOLDER, x 
-    dex 
+    sta PLACEHOLDER, x
+    dex
     bpl writeZero
     iny                                         ; next hi-res row
     dec sizeL                                   ; one more row done
     bne :-
 
     lda willyFrame                              ; get the current frame
-    clc 
+    clc
     adc #2                                      ; advance by 2
     and #7                                      ; and keep in the frame range
     sta willyFrame                              ; update the frame
@@ -373,9 +373,9 @@ demoTime:
 
 done:
     sta demoMode
-    rts 
+    rts
 
-.endproc 
+.endproc
 
 ;-----------------------------------------------------------------------------
 .proc uiWaitForIntroEnter
@@ -399,9 +399,9 @@ done:
 
 cycleLoop:
     lda #6                                      ; print ENTER at x 4
-    sta xPos 
+    sta xPos
     lda #<roTextEnter                           ; point at ENTER text
-    sta textL 
+    sta textL
     lda #>roTextEnter
     sta textH
     lda #5
@@ -422,4 +422,4 @@ cycleLoop:
     ldx #1
     jmp screenClear                             ; all clear page 2
 
-.endproc 
+.endproc
