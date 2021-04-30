@@ -23,29 +23,95 @@ rowH:
     .endrep
 
 ;-----------------------------------------------------------------------------
-; multiplication lookup tables
-mult1024H: 
-.byte $00, $04, $08, $0C, $10, $14, $18, $1C, $20
+; Jump table for screen tile rendering, per row - unrolled loops
+rowDrawL:
+    .byte <tileDrawP0R0
+    .byte <tileDrawP0R1
+    .byte <tileDrawP0R2
+    .byte <tileDrawP0R3
+    .byte <tileDrawP0R4
+    .byte <tileDrawP0R5
+    .byte <tileDrawP0R6
+    .byte <tileDrawP0R7
+    .byte <tileDrawP0R8
+    .byte <tileDrawP0R9
+    .byte <tileDrawP0RA
+    .byte <tileDrawP0RB
+    .byte <tileDrawP0RC
+    .byte <tileDrawP0RD
+    .byte <tileDrawP0RE
+    .byte <tileDrawP0RF
+    .byte <tileDrawP1R0                         ; Page 1
+    .byte <tileDrawP1R1
+    .byte <tileDrawP1R2
+    .byte <tileDrawP1R3
+    .byte <tileDrawP1R4
+    .byte <tileDrawP1R5
+    .byte <tileDrawP1R6
+    .byte <tileDrawP1R7
+    .byte <tileDrawP1R8
+    .byte <tileDrawP1R9
+    .byte <tileDrawP1RA
+    .byte <tileDrawP1RB
+    .byte <tileDrawP1RC
+    .byte <tileDrawP1RD
+    .byte <tileDrawP1RE
+    .byte <tileDrawP1RF
 
+rowDrawH:
+    .byte >tileDrawP0R0
+    .byte >tileDrawP0R1
+    .byte >tileDrawP0R2
+    .byte >tileDrawP0R3
+    .byte >tileDrawP0R4
+    .byte >tileDrawP0R5
+    .byte >tileDrawP0R6
+    .byte >tileDrawP0R7
+    .byte >tileDrawP0R8
+    .byte >tileDrawP0R9
+    .byte >tileDrawP0RA
+    .byte >tileDrawP0RB
+    .byte >tileDrawP0RC
+    .byte >tileDrawP0RD
+    .byte >tileDrawP0RE
+    .byte >tileDrawP0RF
+    .byte >tileDrawP1R0                         ; Page 1
+    .byte >tileDrawP1R1
+    .byte >tileDrawP1R2
+    .byte >tileDrawP1R3
+    .byte >tileDrawP1R4
+    .byte >tileDrawP1R5
+    .byte >tileDrawP1R6
+    .byte >tileDrawP1R7
+    .byte >tileDrawP1R8
+    .byte >tileDrawP1R9
+    .byte >tileDrawP1RA
+    .byte >tileDrawP1RB
+    .byte >tileDrawP1RC
+    .byte >tileDrawP1RD
+    .byte >tileDrawP1RE
+    .byte >tileDrawP1RF
+
+;-----------------------------------------------------------------------------
 mult64H:
 .repeat MAX_SPRITE_IFRAMES, Row
     .byte >(Row * 64)
-.endrep 
+.endrep
 
 mult64L:
 .repeat MAX_SPRITE_IFRAMES, Row
     .byte <(Row * 64)
-.endrep 
+.endrep
 
 mult32H:
 .repeat 15, Row
     .byte >(Row * 32)
-.endrep 
+.endrep
 
 mult32L:
 .repeat 15, Row
     .byte <(Row * 32)
-.endrep 
+.endrep
 
 mult16:
 .repeat 9, Row
@@ -73,13 +139,13 @@ masksRight:
 .byte %00101010                                 ; 01    0-BITS-01..0 Purple
 .byte %10101010                                 ; 02    1-BITS-01..0 Blue
 
-maskGreen: 
+maskGreen:
 .byte %00101010, %01010101                      ; Green
 
-maskOrange: 
+maskOrange:
 .byte %10101010, %11010101                      ; Orange
 
-maskGreenHi: 
+maskGreenHi:
 .byte %00100000, %01000000                      ; Green
 
 maskNewTip:
