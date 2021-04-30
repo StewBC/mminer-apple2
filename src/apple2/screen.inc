@@ -23,13 +23,13 @@ valueSwap:
 
     lda backPage                                ; pretend flip the screen
     eor #1
-    sta backPage 
+    sta backPage
     lda #$60                                    ; pretend flip the screen Hi value so all drawing
     eor currPageH                               ; happens on the front screen
     sta currPageH
-    rts 
+    rts
 
-.endproc 
+.endproc
 
 ;-----------------------------------------------------------------------------
 ; x 0 cleats top (play area minus 8 pixel row), x non-0 clears whole screen
@@ -39,7 +39,7 @@ valueSwap:
 
     ldy backPage
     beq page1
-    jmp page2 
+    jmp page2
 
 page1:
     cpx #0
@@ -50,8 +50,8 @@ page1:
 p1l1:
     .repeat $48, Row
         sta $100 * (>HGRPage1 + (Row + $78) & $07 << 2 | (Row + $78) & $30 >> 4) | (Row + $78) & $08 << 4 | (Row + $78) & $C0 >> 1 | (Row + $78) & $C0 >> 3, x
-    .endrepeat 
-    dex 
+    .endrepeat
+    dex
     bmi p1p2
     jmp p1l1
 
@@ -60,13 +60,13 @@ p1p2:
 p1l2:
     .repeat $78, Row
         sta $100 * (>HGRPage1 + Row & $07 << 2 | Row & $30 >> 4) | Row & $08 << 4 | Row & $C0 >> 1 | Row & $C0 >> 3, x
-    .endrepeat 
-    dex 
+    .endrepeat
+    dex
     bmi done0
     jmp p1l2
 
 done0:
-    rts 
+    rts
 
 page2:
     cpx #0
@@ -78,8 +78,8 @@ page2:
 p2l1:
     .repeat $48, Row
         sta $100 * (>HGRPage2 + (Row + $78) & $07 << 2 | (Row + $78) & $30 >> 4) | (Row + $78) & $08 << 4 | (Row + $78) & $C0 >> 1 | (Row + $78) & $C0 >> 3, x
-    .endrepeat 
-    dex 
+    .endrepeat
+    dex
     bmi p2p2
     jmp p2l1
 
@@ -88,15 +88,15 @@ p2p2:
 p2l2:
     .repeat $78, Row
         sta $100 * (>HGRPage2 + Row & $07 << 2 | Row & $30 >> 4) | Row & $08 << 4 | Row & $C0 >> 1 | Row & $C0 >> 3, x
-    .endrepeat 
-    dex 
+    .endrepeat
+    dex
     bmi done1
     jmp p2l2
 
 done1:
-    rts 
+    rts
 
-.endproc 
+.endproc
 
 ;-----------------------------------------------------------------------------
 .proc screenDrawLevelName
@@ -118,25 +118,25 @@ done1:
     sta $2050, x                                ; store to the screen (the hi byte is updated)
 
     lda levelNameGfx0 + $0040, y                ; but the lo byte ($50) is correct for row 16 (0 based)
-    sta $2450, x 
+    sta $2450, x
 
     lda levelNameGfx0 + $0080, y                ; the cache is linear so each line is $40 from previous
-    sta $2850, x 
+    sta $2850, x
 
     lda levelNameGfx0 + $00C0, y
-    sta $2C50, x 
+    sta $2C50, x
 
     lda levelNameGfx0 + $0100, y
-    sta $3050, x 
+    sta $3050, x
 
     lda levelNameGfx0 + $0140, y
-    sta $3450, x 
+    sta $3450, x
 
     lda levelNameGfx0 + $0180, y
-    sta $3850, x 
+    sta $3850, x
 
     lda levelNameGfx0 + $01C0, y
-    sta $3C50, x 
+    sta $3C50, x
 
     dey                                         ; previous cache byte
     dex                                         ; previous screen byte
@@ -149,25 +149,25 @@ page2:
     sta $4050, x                                ; store to the screen (the hi byte is updated)
 
     lda levelNameGfx0 + $0040, y                ; but the lo byte ($50) is correct for row 16 (0 based)
-    sta $4450, x 
+    sta $4450, x
 
     lda levelNameGfx0 + $0080, y
-    sta $4850, x 
+    sta $4850, x
 
     lda levelNameGfx0 + $00C0, y
-    sta $4C50, x 
+    sta $4C50, x
 
     lda levelNameGfx0 + $0100, y
-    sta $5050, x 
+    sta $5050, x
 
     lda levelNameGfx0 + $0140, y
-    sta $5450, x 
+    sta $5450, x
 
     lda levelNameGfx0 + $0180, y
-    sta $5850, x 
+    sta $5850, x
 
     lda levelNameGfx0 + $01C0, y
-    sta $5C50, x 
+    sta $5C50, x
 
     dey                                         ; previous cache byte
     dex                                         ; previous screen byte
@@ -175,7 +175,7 @@ page2:
 
     rts
 
-.endproc 
+.endproc
 
 ;-----------------------------------------------------------------------------
 .proc screenDrawAirFrame
@@ -199,7 +199,7 @@ page2:
     sta $3CDB, x
 
     dex                                         ; step back in 2's for left/right
-    dex 
+    dex
     bpl :-
 
     ldx #31                                     ; draw the even longer white bar that counts down
@@ -231,7 +231,7 @@ page2:                                          ; the same as page 1, just diff 
     sta $5CDB, x
 
     dex
-    dex 
+    dex
     bpl :-
 
     ldx #31
@@ -242,12 +242,12 @@ page2:                                          ; the same as page 1, just diff 
     sta $50D7, x
     sta $54D7, x
 
-    dex 
+    dex
     bpl :-
 
     rts
 
-.endproc 
+.endproc
 
 ;-----------------------------------------------------------------------------
 .proc screenDrawAirRemaining
@@ -261,13 +261,13 @@ page2:                                          ; the same as page 1, just diff 
     ldy currPageH                               ; which page
     cpy #$20
     bne page2
-    
+
     sta $28D7, x                                ; write the tip into page 1
     sta $2CD7, x
     sta $30D7, x
     sta $34D7, x
-    
-    rts 
+
+    rts
 
 page2:
     sta $48D7, x                                ; write the tip into page 2
@@ -277,100 +277,64 @@ page2:
 
     rts
 
-.endproc 
+.endproc
 
 ;-----------------------------------------------------------------------------
 .proc screenDrawLevel
-
-    tileReadL      = srcPtrL                    ; tile to draw's data
-    tileReadH      = srcPtrH
-    scrnPtrL       = dstPtrL                    ; location in screen buffer to draw to
-    scrnPtrH       = dstPtrH
+    levelReadL     = srcPtrL                    ; tile to draw in level
+    levelReadH     = srcPtrH
+    tileReadL      = dstPtrL                    ; data for tile to draw 
+    tileReadH      = dstPtrH
     rows           = sizeL                      ; rows to draw (15 -> 0)
     cols           = sizeH                      ; cols to draw (20 + leftEdge -> leftEdge)
-    willyYRowEnd   = tmpBot + 0                 ; row where willy overlaps ends (+1)
-    willyXPosStart = tmpBot + 1                 ; col where willy overlaps start
-    willyXPosEnd   = tmpBot + 2                 ; row where willy overlaps ends (+1)
-    rowStartL      = tmpBot + 3                 ; current screen draw row start
-    rowStartH      = tmpBot + 4
-    height         = tmpBot + 5                 ; normally 8 except for collapsing platforms
 
     lda #0
     sta tilesRendered
-    lda willyYPos                               ; see if willy is across 2 or 3 rows
-    and #7
+    sta cols
+    sta rows
+    tay
+
+    lda leftEdge
+    adc #<levelLayout
+    sta levelReadL
+    lda #>levelLayout
+    sta levelReadH
+
+nextRow:
+    clc
+    lda backPage
     beq :+
-    lda #3
-    bne :++
+    lda #PLAY_ROWS
 :
-    lda #2
-:
-    clc 
-    adc willyYRow                               ; and set up the end row (+1)
-    sta willyYRowEnd
-
-    lda willyXPos                               ; calculate the cols that willy overlaps
-    sec 
-    sbc leftEdge
-    sta willyXPosStart
-    clc
-    adc #2
-    sta willyXPosEnd
-    clc                                         ; in demo-mode, the prev didn't make sense and carry is set
-
-    lda leftEdge                                ; col where to start drawing (right, bottom)
-    adc #<(levelLayout + (PLAY_ROWS - 1) * PLAY_COLS)
-    sta colLoop + 1
-    lda #>(levelLayout + (PLAY_ROWS - 1) * PLAY_COLS)
-    sta colLoop + 2                             ; levelLayout aligned so carry always clear
-
-    lda #PLAY_ROWS - 1                          ; zero based rows to process
-    sta rows                                    ; draw rows bottom up
-
-rowLoop:
-    clc
-    ldy rows                                    ; rows are 8 lines high
-    lda mult8, y
-    tay 
-
-    lda rowL, y                                 ; put the row in screen space
-    sta rowStartL                               ; and save in a temp place
-    lda rowH, y
-    adc currPageH
-    sta rowStartH
-
-    ldx #VISIBLE_COLS - 1                       ; draw 20 columns (0 based)
-
-colLoop:
-    lda PLACEHOLDER, x                          ; get the tile from the unpacked level
-    bne :+                                      ; if non-zero process that tile
-    jmp prevCol                                 ; 0 (space) - skip to next tile to process
-:
-    cmp #DATA_COLLAPSE                          ; see if the tile is a collapsing tile
-    bcc notCollapse                             ; the $70 could be $71->$77 for the collapsed state
+    adc rows
+    tax
+    lda rowDrawL,x
+    sta tileDraw+1
+    lda rowDrawH,x
+    sta tileDraw+2
+readLevelCol:
+    lda (levelReadL),y
+    beq nextCol
+    inc tilesRendered
+    sty cols                                    ; save the current col index
+    pha                                         ; save the tile id
+    and #$F0                                    ; strip to bare tile (no extra infor like collapse state)
+    adc #<(tilesInstances - TILE_BYTES)         ; Index 1 has it's bytes at + 0, so move start 1 tile back
+    sta tileReadL
+    lda #>(tilesInstances - TILE_BYTES) + 1     ; carry always set, so + 1
+    sta tileReadH                               ; points at the tile data
+    tya                                         ; col to a
+    asl                                         ; *2 since each tile is 2 cols on screen
+    tax                                         ; put the sceen col into x
+    pla                                         ; restore the tileID
+    cmp #DATA_COLLAPSE+1                        ; see if the tile is an active collapsing tile (>=$71)
+    bcc prepTileDraw                            ; could be $71->$77 for the collapsed state
     cmp #DATA_KEY
     bcc isCollapse                              ; if it's less than $80 it is a collapsing platform
-    beq notCollapseClc                          ; is it a key
+    beq prepTileDraw                            ; is it a key
     cmp #DATA_DOOR                              ; if not a key, is it a door
-    bcc setupSwitch                             ; if < door then it's a switch
-    jmp prevCol                                 ; door tile isn't a rendered tile, only a collision tile
-
-isCollapse: 
-    and #7                                      ; get the level of collapse
-    tay 
-    lda collapseHeight, y                       ; see how many lines remain to draw
-    sta height
-    lda mult1024H, y                            ; and move the screen pointer down as well
-    sta scrnPtrH
-    lda #DATA_COLLAPSE                          ; and set up to draw the tile from the top (for fewer lines)
-    bne setupTile                               ; BRA
-
-setupSwitch:
-    ldy #0                                      ; this code duplicated from notCollapse since setupTile is skipped
-    sty scrnPtrH                                ; not a collapsing tile so set the screen ptr to top
-    ldy #8                                      ; and set the height to 8 lines to draw
-    sty height
-
+    beq nextCol                                 ; door tile isn't a rendered tile, only a collision tile
+setupSwitch:                                    ; if < door then it's a switch
     and #1                                      ; is this an on switch?
     beq :+                                      ; no
     lda #16                                     ; yes - the image is 16 bytes further (tile36)
@@ -378,104 +342,44 @@ setupSwitch:
     adc #<tile35                                ; add the offset of the switch image
     sta tileReadL
     lda #>tile35                                ; and set the hi byte too
-    adc #0                                      ; turns out tile36 is in a different block (if I remove these 2 bytes ;)
-    sta tileReadH                               ; points at the tile data
-    bne :+                                      ; skip the portion where the tile pointer is setup
-
-notCollapseClc:
-    clc
-notCollapse:
-    ldy #0                                      ; not a collapsing tile so set the screen ptr to top
-    sty scrnPtrH
-    ldy #8                                      ; and set the height to 8 lines to draw
-    sty height
-
-setupTile:
-    adc #<(tilesInstances - TILE_BYTES)         ; Index 1 has it's bytes at + 0, so move start 1 tile back
-    sta tileReadL
-    lda #>(tilesInstances - TILE_BYTES) + 1     ; carry always set, so + 1
+    adc #0                                      ; turns out tile36 is in a different block (if I remove these 2 bytes          ;)
     sta tileReadH                               ; points at the tile data
 
-:
-    inc tilesRendered
-    txa                                         ; get the col
-    asl                                         ; * 2 for 2-byte wide tiles and clears carry
-    adc rowStartL                               ; add to screen row start to get tile screen dest
-    sta scrnPtrL
-    lda rowStartH
-    adc scrnPtrH                                ; add the hi offset for collapsed tiles
-    sta scrnPtrH
-
-intersect:
-    lda rows                                    ; see if willy intersects this row
-    cmp willyYRow
-    bcc noOverlap                               ; is willy below this row?
-    cmp willyYRowEnd
-    bcs noOverlapClc                            ; is willy's end above this row
-    txa                                         ; rows intersect, now check the cols
-    cmp willyXPosStart
-    bcc noOverlap                               ; is col < willyStartCol
-    cmp willyXPosEnd
-    bcs noOverlapClc                            ; is col > willyEndCol (>= willyEnd + 1)
-
-overlap:                                        ; willy will be "under" these tiles, so "or" in the
-    ldy #0                                      ; tile to the screen.  Since willy's bits are 11, willy
-    lda (tileReadL), y                          ; will "appear" as though he's in front of the tile
-    ora (scrnPtrL), y                           ; see noOverlap for code explanation
-    sta (scrnPtrL), y
-    ldy #1
-    lda (tileReadL), y
-    ora (scrnPtrL), y
-    sta (scrnPtrL), y
-
-    lda tileReadL
-    adc #2 
-    sta tileReadL
-    lda scrnPtrH
-    adc #$04
-    sta scrnPtrH
-    dec height 
-    bne overlap
-    beq prevCol
-
-noOverlapClc:
-    clc
-noOverlap:                                      ; tile's don't intercept with willy so just write to screen
-    ldy #0                                      ; start with a byte at 0 offset (left)
-    lda (tileReadL), y                          ; read tile byte
-    sta (scrnPtrL), y                           ; write to screen
-    ldy #1                                      ; do the same for the right byte at offset 1
-    lda (tileReadL), y
-    sta (scrnPtrL), y
-
-    lda tileReadL                               ; advance the tile ptr by 2 for the 2 just written
-    adc #2 
-    sta tileReadL
-    lda scrnPtrH                                ; advance the screen ptr to next row ($400)
-    adc #$04
-    sta scrnPtrH
-
-    dec height                                  ; done one more row
-    bne noOverlap                               ; keep going till all rows done
-
-prevCol:
-    dex                                         ; go to col to the left
-    bmi :+                                      ; reached the end of the row?
-    jmp colLoop                                 ; not yet end of row so go do this col
-:
-    dec rows                                    ; done another row
-    bmi done                                    ; done all rows?
-
-    lda colLoop + 1                             ; not yet - setp up a row in the unpacked tile area
-    sec 
-    sbc #32
-    sta colLoop + 1
-    bcs :+
-    dec colLoop + 2
-:
-    jmp rowLoop                                 ; go do the next row's worth of tiles
-
-done:
+prepTileDraw:
+    ldy #0                                      ; set index for where to read tile data to the start
+tileDraw:
+    jsr PLACEHOLDER
+    ldy cols
+nextCol:
+    iny
+    cpy #VISIBLE_COLS
+    bne readLevelCol
+    ldy #0
+    inc rows
+    lda rows
+    cmp #PLAY_ROWS
+    beq allDrawn
+    lda levelReadL
+    adc #PLAY_COLS
+    sta levelReadL
+    bcc nextRow
+    inc levelReadH
+    bne nextRow                                 ; bra
+isCollapse:
+    and #7                                      ; get the level of collapse
+    tay
+    lda collapseHeight, y                       ; see how many lines remain to draw and skip bytes
+    adc tileDraw+1                              ; base address of draw routine
+    sta collapseDraw+1
+    lda tileDraw+2
+    adc #0
+    sta collapseDraw+2
+    ldy #0
+collapseDraw:
+    jsr PLACEHOLDER
+    ldy cols
+    jmp nextCol
+allDrawn:
     lda currLevel
     cmp #LEVEL_Solar_Power_Generator            ; Is this the solar room
     bne :+                                      ; if not, move on
@@ -486,25 +390,1785 @@ done:
 .endproc
 
 ;-----------------------------------------------------------------------------
+.proc tileDrawP0R0
+    tileReadL      = dstPtrL                    ; tile to draw's data
+    tileReadH      = dstPtrH
+
+    lda (tileReadL),y
+    sta $2000,x
+    iny
+    lda (tileReadL),y
+    sta $2001,x
+    iny
+    lda (tileReadL),y
+    sta $2400,x
+    iny
+    lda (tileReadL),y
+    sta $2401,x
+    iny
+    lda (tileReadL),y
+    sta $2800,x
+    iny
+    lda (tileReadL),y
+    sta $2801,x
+    iny
+    lda (tileReadL),y
+    sta $2C00,x
+    iny
+    lda (tileReadL),y
+    sta $2C01,x
+    iny
+    lda (tileReadL),y
+    sta $3000,x
+    iny
+    lda (tileReadL),y
+    sta $3001,x
+    iny
+    lda (tileReadL),y
+    sta $3400,x
+    iny
+    lda (tileReadL),y
+    sta $3401,x
+    iny
+    lda (tileReadL),y
+    sta $3800,x
+    iny
+    lda (tileReadL),y
+    sta $3801,x
+    iny
+    lda (tileReadL),y
+    sta $3C00,x
+    iny
+    lda (tileReadL),y
+    sta $3C01,x
+    rts
+.endproc
+
+;-----------------------------------------------------------------------------
+.proc tileDrawP1R0
+    tileReadL      = dstPtrL                    ; tile to draw's data
+    tileReadH      = dstPtrH
+
+    lda (tileReadL),y
+    sta $4000,x
+    iny
+    lda (tileReadL),y
+    sta $4001,x
+    iny
+    lda (tileReadL),y
+    sta $4400,x
+    iny
+    lda (tileReadL),y
+    sta $4401,x
+    iny
+    lda (tileReadL),y
+    sta $4800,x
+    iny
+    lda (tileReadL),y
+    sta $4801,x
+    iny
+    lda (tileReadL),y
+    sta $4C00,x
+    iny
+    lda (tileReadL),y
+    sta $4C01,x
+    iny
+    lda (tileReadL),y
+    sta $5000,x
+    iny
+    lda (tileReadL),y
+    sta $5001,x
+    iny
+    lda (tileReadL),y
+    sta $5400,x
+    iny
+    lda (tileReadL),y
+    sta $5401,x
+    iny
+    lda (tileReadL),y
+    sta $5800,x
+    iny
+    lda (tileReadL),y
+    sta $5801,x
+    iny
+    lda (tileReadL),y
+    sta $5C00,x
+    iny
+    lda (tileReadL),y
+    sta $5C01,x
+    rts
+.endproc
+
+;-----------------------------------------------------------------------------
+.proc tileDrawP0R1
+    tileReadL      = dstPtrL                    ; tile to draw's data
+    tileReadH      = dstPtrH
+
+    lda (tileReadL),y
+    sta $2080,x
+    iny
+    lda (tileReadL),y
+    sta $2081,x
+    iny
+    lda (tileReadL),y
+    sta $2480,x
+    iny
+    lda (tileReadL),y
+    sta $2481,x
+    iny
+    lda (tileReadL),y
+    sta $2880,x
+    iny
+    lda (tileReadL),y
+    sta $2881,x
+    iny
+    lda (tileReadL),y
+    sta $2C80,x
+    iny
+    lda (tileReadL),y
+    sta $2C81,x
+    iny
+    lda (tileReadL),y
+    sta $3080,x
+    iny
+    lda (tileReadL),y
+    sta $3081,x
+    iny
+    lda (tileReadL),y
+    sta $3480,x
+    iny
+    lda (tileReadL),y
+    sta $3481,x
+    iny
+    lda (tileReadL),y
+    sta $3880,x
+    iny
+    lda (tileReadL),y
+    sta $3881,x
+    iny
+    lda (tileReadL),y
+    sta $3C80,x
+    iny
+    lda (tileReadL),y
+    sta $3C81,x
+    rts
+.endproc
+
+;-----------------------------------------------------------------------------
+.proc tileDrawP1R1
+    tileReadL      = dstPtrL                    ; tile to draw's data
+    tileReadH      = dstPtrH
+
+    lda (tileReadL),y
+    sta $4080,x
+    iny
+    lda (tileReadL),y
+    sta $4081,x
+    iny
+    lda (tileReadL),y
+    sta $4480,x
+    iny
+    lda (tileReadL),y
+    sta $4481,x
+    iny
+    lda (tileReadL),y
+    sta $4880,x
+    iny
+    lda (tileReadL),y
+    sta $4881,x
+    iny
+    lda (tileReadL),y
+    sta $4C80,x
+    iny
+    lda (tileReadL),y
+    sta $4C81,x
+    iny
+    lda (tileReadL),y
+    sta $5080,x
+    iny
+    lda (tileReadL),y
+    sta $5081,x
+    iny
+    lda (tileReadL),y
+    sta $5480,x
+    iny
+    lda (tileReadL),y
+    sta $5481,x
+    iny
+    lda (tileReadL),y
+    sta $5880,x
+    iny
+    lda (tileReadL),y
+    sta $5881,x
+    iny
+    lda (tileReadL),y
+    sta $5C80,x
+    iny
+    lda (tileReadL),y
+    sta $5C81,x
+    rts
+.endproc
+
+;-----------------------------------------------------------------------------
+.proc tileDrawP0R2
+    tileReadL      = dstPtrL                    ; tile to draw's data
+    tileReadH      = dstPtrH
+
+    lda (tileReadL),y
+    sta $2100,x
+    iny
+    lda (tileReadL),y
+    sta $2101,x
+    iny
+    lda (tileReadL),y
+    sta $2500,x
+    iny
+    lda (tileReadL),y
+    sta $2501,x
+    iny
+    lda (tileReadL),y
+    sta $2900,x
+    iny
+    lda (tileReadL),y
+    sta $2901,x
+    iny
+    lda (tileReadL),y
+    sta $2D00,x
+    iny
+    lda (tileReadL),y
+    sta $2D01,x
+    iny
+    lda (tileReadL),y
+    sta $3100,x
+    iny
+    lda (tileReadL),y
+    sta $3101,x
+    iny
+    lda (tileReadL),y
+    sta $3500,x
+    iny
+    lda (tileReadL),y
+    sta $3501,x
+    iny
+    lda (tileReadL),y
+    sta $3900,x
+    iny
+    lda (tileReadL),y
+    sta $3901,x
+    iny
+    lda (tileReadL),y
+    sta $3D00,x
+    iny
+    lda (tileReadL),y
+    sta $3D01,x
+    rts
+.endproc
+
+;-----------------------------------------------------------------------------
+.proc tileDrawP1R2
+    tileReadL      = dstPtrL                    ; tile to draw's data
+    tileReadH      = dstPtrH
+
+    lda (tileReadL),y
+    sta $4100,x
+    iny
+    lda (tileReadL),y
+    sta $4101,x
+    iny
+    lda (tileReadL),y
+    sta $4500,x
+    iny
+    lda (tileReadL),y
+    sta $4501,x
+    iny
+    lda (tileReadL),y
+    sta $4900,x
+    iny
+    lda (tileReadL),y
+    sta $4901,x
+    iny
+    lda (tileReadL),y
+    sta $4D00,x
+    iny
+    lda (tileReadL),y
+    sta $4D01,x
+    iny
+    lda (tileReadL),y
+    sta $5100,x
+    iny
+    lda (tileReadL),y
+    sta $5101,x
+    iny
+    lda (tileReadL),y
+    sta $5500,x
+    iny
+    lda (tileReadL),y
+    sta $5501,x
+    iny
+    lda (tileReadL),y
+    sta $5900,x
+    iny
+    lda (tileReadL),y
+    sta $5901,x
+    iny
+    lda (tileReadL),y
+    sta $5D00,x
+    iny
+    lda (tileReadL),y
+    sta $5D01,x
+    rts
+.endproc
+
+;-----------------------------------------------------------------------------
+.proc tileDrawP0R3
+    tileReadL      = dstPtrL                    ; tile to draw's data
+    tileReadH      = dstPtrH
+
+    lda (tileReadL),y
+    sta $2180,x
+    iny
+    lda (tileReadL),y
+    sta $2181,x
+    iny
+    lda (tileReadL),y
+    sta $2580,x
+    iny
+    lda (tileReadL),y
+    sta $2581,x
+    iny
+    lda (tileReadL),y
+    sta $2980,x
+    iny
+    lda (tileReadL),y
+    sta $2981,x
+    iny
+    lda (tileReadL),y
+    sta $2D80,x
+    iny
+    lda (tileReadL),y
+    sta $2D81,x
+    iny
+    lda (tileReadL),y
+    sta $3180,x
+    iny
+    lda (tileReadL),y
+    sta $3181,x
+    iny
+    lda (tileReadL),y
+    sta $3580,x
+    iny
+    lda (tileReadL),y
+    sta $3581,x
+    iny
+    lda (tileReadL),y
+    sta $3980,x
+    iny
+    lda (tileReadL),y
+    sta $3981,x
+    iny
+    lda (tileReadL),y
+    sta $3D80,x
+    iny
+    lda (tileReadL),y
+    sta $3D81,x
+    rts
+.endproc
+
+;-----------------------------------------------------------------------------
+.proc tileDrawP1R3
+    tileReadL      = dstPtrL                    ; tile to draw's data
+    tileReadH      = dstPtrH
+
+    lda (tileReadL),y
+    sta $4180,x
+    iny
+    lda (tileReadL),y
+    sta $4181,x
+    iny
+    lda (tileReadL),y
+    sta $4580,x
+    iny
+    lda (tileReadL),y
+    sta $4581,x
+    iny
+    lda (tileReadL),y
+    sta $4980,x
+    iny
+    lda (tileReadL),y
+    sta $4981,x
+    iny
+    lda (tileReadL),y
+    sta $4D80,x
+    iny
+    lda (tileReadL),y
+    sta $4D81,x
+    iny
+    lda (tileReadL),y
+    sta $5180,x
+    iny
+    lda (tileReadL),y
+    sta $5181,x
+    iny
+    lda (tileReadL),y
+    sta $5580,x
+    iny
+    lda (tileReadL),y
+    sta $5581,x
+    iny
+    lda (tileReadL),y
+    sta $5980,x
+    iny
+    lda (tileReadL),y
+    sta $5981,x
+    iny
+    lda (tileReadL),y
+    sta $5D80,x
+    iny
+    lda (tileReadL),y
+    sta $5D81,x
+    rts
+.endproc
+
+;-----------------------------------------------------------------------------
+.proc tileDrawP0R4
+    tileReadL      = dstPtrL                    ; tile to draw's data
+    tileReadH      = dstPtrH
+
+    lda (tileReadL),y
+    sta $2200,x
+    iny
+    lda (tileReadL),y
+    sta $2201,x
+    iny
+    lda (tileReadL),y
+    sta $2600,x
+    iny
+    lda (tileReadL),y
+    sta $2601,x
+    iny
+    lda (tileReadL),y
+    sta $2A00,x
+    iny
+    lda (tileReadL),y
+    sta $2A01,x
+    iny
+    lda (tileReadL),y
+    sta $2E00,x
+    iny
+    lda (tileReadL),y
+    sta $2E01,x
+    iny
+    lda (tileReadL),y
+    sta $3200,x
+    iny
+    lda (tileReadL),y
+    sta $3201,x
+    iny
+    lda (tileReadL),y
+    sta $3600,x
+    iny
+    lda (tileReadL),y
+    sta $3601,x
+    iny
+    lda (tileReadL),y
+    sta $3A00,x
+    iny
+    lda (tileReadL),y
+    sta $3A01,x
+    iny
+    lda (tileReadL),y
+    sta $3E00,x
+    iny
+    lda (tileReadL),y
+    sta $3E01,x
+    rts
+.endproc
+
+;-----------------------------------------------------------------------------
+.proc tileDrawP1R4
+    tileReadL      = dstPtrL                    ; tile to draw's data
+    tileReadH      = dstPtrH
+
+    lda (tileReadL),y
+    sta $4200,x
+    iny
+    lda (tileReadL),y
+    sta $4201,x
+    iny
+    lda (tileReadL),y
+    sta $4600,x
+    iny
+    lda (tileReadL),y
+    sta $4601,x
+    iny
+    lda (tileReadL),y
+    sta $4A00,x
+    iny
+    lda (tileReadL),y
+    sta $4A01,x
+    iny
+    lda (tileReadL),y
+    sta $4E00,x
+    iny
+    lda (tileReadL),y
+    sta $4E01,x
+    iny
+    lda (tileReadL),y
+    sta $5200,x
+    iny
+    lda (tileReadL),y
+    sta $5201,x
+    iny
+    lda (tileReadL),y
+    sta $5600,x
+    iny
+    lda (tileReadL),y
+    sta $5601,x
+    iny
+    lda (tileReadL),y
+    sta $5A00,x
+    iny
+    lda (tileReadL),y
+    sta $5A01,x
+    iny
+    lda (tileReadL),y
+    sta $5E00,x
+    iny
+    lda (tileReadL),y
+    sta $5E01,x
+    rts
+.endproc
+
+;-----------------------------------------------------------------------------
+.proc tileDrawP0R5
+    tileReadL      = dstPtrL                    ; tile to draw's data
+    tileReadH      = dstPtrH
+
+    lda (tileReadL),y
+    sta $2280,x
+    iny
+    lda (tileReadL),y
+    sta $2281,x
+    iny
+    lda (tileReadL),y
+    sta $2680,x
+    iny
+    lda (tileReadL),y
+    sta $2681,x
+    iny
+    lda (tileReadL),y
+    sta $2A80,x
+    iny
+    lda (tileReadL),y
+    sta $2A81,x
+    iny
+    lda (tileReadL),y
+    sta $2E80,x
+    iny
+    lda (tileReadL),y
+    sta $2E81,x
+    iny
+    lda (tileReadL),y
+    sta $3280,x
+    iny
+    lda (tileReadL),y
+    sta $3281,x
+    iny
+    lda (tileReadL),y
+    sta $3680,x
+    iny
+    lda (tileReadL),y
+    sta $3681,x
+    iny
+    lda (tileReadL),y
+    sta $3A80,x
+    iny
+    lda (tileReadL),y
+    sta $3A81,x
+    iny
+    lda (tileReadL),y
+    sta $3E80,x
+    iny
+    lda (tileReadL),y
+    sta $3E81,x
+    rts
+.endproc
+
+;-----------------------------------------------------------------------------
+.proc tileDrawP1R5
+    tileReadL      = dstPtrL                    ; tile to draw's data
+    tileReadH      = dstPtrH
+
+    lda (tileReadL),y
+    sta $4280,x
+    iny
+    lda (tileReadL),y
+    sta $4281,x
+    iny
+    lda (tileReadL),y
+    sta $4680,x
+    iny
+    lda (tileReadL),y
+    sta $4681,x
+    iny
+    lda (tileReadL),y
+    sta $4A80,x
+    iny
+    lda (tileReadL),y
+    sta $4A81,x
+    iny
+    lda (tileReadL),y
+    sta $4E80,x
+    iny
+    lda (tileReadL),y
+    sta $4E81,x
+    iny
+    lda (tileReadL),y
+    sta $5280,x
+    iny
+    lda (tileReadL),y
+    sta $5281,x
+    iny
+    lda (tileReadL),y
+    sta $5680,x
+    iny
+    lda (tileReadL),y
+    sta $5681,x
+    iny
+    lda (tileReadL),y
+    sta $5A80,x
+    iny
+    lda (tileReadL),y
+    sta $5A81,x
+    iny
+    lda (tileReadL),y
+    sta $5E80,x
+    iny
+    lda (tileReadL),y
+    sta $5E81,x
+    rts
+.endproc
+
+;-----------------------------------------------------------------------------
+.proc tileDrawP0R6
+    tileReadL      = dstPtrL                    ; tile to draw's data
+    tileReadH      = dstPtrH
+
+    lda (tileReadL),y
+    sta $2300,x
+    iny
+    lda (tileReadL),y
+    sta $2301,x
+    iny
+    lda (tileReadL),y
+    sta $2700,x
+    iny
+    lda (tileReadL),y
+    sta $2701,x
+    iny
+    lda (tileReadL),y
+    sta $2B00,x
+    iny
+    lda (tileReadL),y
+    sta $2B01,x
+    iny
+    lda (tileReadL),y
+    sta $2F00,x
+    iny
+    lda (tileReadL),y
+    sta $2F01,x
+    iny
+    lda (tileReadL),y
+    sta $3300,x
+    iny
+    lda (tileReadL),y
+    sta $3301,x
+    iny
+    lda (tileReadL),y
+    sta $3700,x
+    iny
+    lda (tileReadL),y
+    sta $3701,x
+    iny
+    lda (tileReadL),y
+    sta $3B00,x
+    iny
+    lda (tileReadL),y
+    sta $3B01,x
+    iny
+    lda (tileReadL),y
+    sta $3F00,x
+    iny
+    lda (tileReadL),y
+    sta $3F01,x
+    rts
+.endproc
+
+;-----------------------------------------------------------------------------
+.proc tileDrawP1R6
+    tileReadL      = dstPtrL                    ; tile to draw's data
+    tileReadH      = dstPtrH
+
+    lda (tileReadL),y
+    sta $4300,x
+    iny
+    lda (tileReadL),y
+    sta $4301,x
+    iny
+    lda (tileReadL),y
+    sta $4700,x
+    iny
+    lda (tileReadL),y
+    sta $4701,x
+    iny
+    lda (tileReadL),y
+    sta $4B00,x
+    iny
+    lda (tileReadL),y
+    sta $4B01,x
+    iny
+    lda (tileReadL),y
+    sta $4F00,x
+    iny
+    lda (tileReadL),y
+    sta $4F01,x
+    iny
+    lda (tileReadL),y
+    sta $5300,x
+    iny
+    lda (tileReadL),y
+    sta $5301,x
+    iny
+    lda (tileReadL),y
+    sta $5700,x
+    iny
+    lda (tileReadL),y
+    sta $5701,x
+    iny
+    lda (tileReadL),y
+    sta $5B00,x
+    iny
+    lda (tileReadL),y
+    sta $5B01,x
+    iny
+    lda (tileReadL),y
+    sta $5F00,x
+    iny
+    lda (tileReadL),y
+    sta $5F01,x
+    rts
+.endproc
+
+;-----------------------------------------------------------------------------
+.proc tileDrawP0R7
+    tileReadL      = dstPtrL                    ; tile to draw's data
+    tileReadH      = dstPtrH
+
+    lda (tileReadL),y
+    sta $2380,x
+    iny
+    lda (tileReadL),y
+    sta $2381,x
+    iny
+    lda (tileReadL),y
+    sta $2780,x
+    iny
+    lda (tileReadL),y
+    sta $2781,x
+    iny
+    lda (tileReadL),y
+    sta $2B80,x
+    iny
+    lda (tileReadL),y
+    sta $2B81,x
+    iny
+    lda (tileReadL),y
+    sta $2F80,x
+    iny
+    lda (tileReadL),y
+    sta $2F81,x
+    iny
+    lda (tileReadL),y
+    sta $3380,x
+    iny
+    lda (tileReadL),y
+    sta $3381,x
+    iny
+    lda (tileReadL),y
+    sta $3780,x
+    iny
+    lda (tileReadL),y
+    sta $3781,x
+    iny
+    lda (tileReadL),y
+    sta $3B80,x
+    iny
+    lda (tileReadL),y
+    sta $3B81,x
+    iny
+    lda (tileReadL),y
+    sta $3F80,x
+    iny
+    lda (tileReadL),y
+    sta $3F81,x
+    rts
+.endproc
+
+;-----------------------------------------------------------------------------
+.proc tileDrawP1R7
+    tileReadL      = dstPtrL                    ; tile to draw's data
+    tileReadH      = dstPtrH
+
+    lda (tileReadL),y
+    sta $4380,x
+    iny
+    lda (tileReadL),y
+    sta $4381,x
+    iny
+    lda (tileReadL),y
+    sta $4780,x
+    iny
+    lda (tileReadL),y
+    sta $4781,x
+    iny
+    lda (tileReadL),y
+    sta $4B80,x
+    iny
+    lda (tileReadL),y
+    sta $4B81,x
+    iny
+    lda (tileReadL),y
+    sta $4F80,x
+    iny
+    lda (tileReadL),y
+    sta $4F81,x
+    iny
+    lda (tileReadL),y
+    sta $5380,x
+    iny
+    lda (tileReadL),y
+    sta $5381,x
+    iny
+    lda (tileReadL),y
+    sta $5780,x
+    iny
+    lda (tileReadL),y
+    sta $5781,x
+    iny
+    lda (tileReadL),y
+    sta $5B80,x
+    iny
+    lda (tileReadL),y
+    sta $5B81,x
+    iny
+    lda (tileReadL),y
+    sta $5F80,x
+    iny
+    lda (tileReadL),y
+    sta $5F81,x
+    rts
+.endproc
+
+;-----------------------------------------------------------------------------
+.proc tileDrawP0R8
+    tileReadL      = dstPtrL                    ; tile to draw's data
+    tileReadH      = dstPtrH
+
+    lda (tileReadL),y
+    sta $2028,X
+    iny
+    lda (tileReadL),y
+    sta $2029,X
+    iny
+    lda (tileReadL),y
+    sta $2428,X
+    iny
+    lda (tileReadL),y
+    sta $2429,X
+    iny
+    lda (tileReadL),y
+    sta $2828,X
+    iny
+    lda (tileReadL),y
+    sta $2829,X
+    iny
+    lda (tileReadL),y
+    sta $2C28,X
+    iny
+    lda (tileReadL),y
+    sta $2C29,X
+    iny
+    lda (tileReadL),y
+    sta $3028,X
+    iny
+    lda (tileReadL),y
+    sta $3029,X
+    iny
+    lda (tileReadL),y
+    sta $3428,X
+    iny
+    lda (tileReadL),y
+    sta $3429,X
+    iny
+    lda (tileReadL),y
+    sta $3828,X
+    iny
+    lda (tileReadL),y
+    sta $3829,X
+    iny
+    lda (tileReadL),y
+    sta $3C28,X
+    iny
+    lda (tileReadL),y
+    sta $3C29,X
+    rts
+.endproc
+
+;-----------------------------------------------------------------------------
+.proc tileDrawP1R8
+    tileReadL      = dstPtrL                    ; tile to draw's data
+    tileReadH      = dstPtrH
+
+    lda (tileReadL),y
+    sta $4028,X
+    iny
+    lda (tileReadL),y
+    sta $4029,X
+    iny
+    lda (tileReadL),y
+    sta $4428,X
+    iny
+    lda (tileReadL),y
+    sta $4429,X
+    iny
+    lda (tileReadL),y
+    sta $4828,X
+    iny
+    lda (tileReadL),y
+    sta $4829,X
+    iny
+    lda (tileReadL),y
+    sta $4C28,X
+    iny
+    lda (tileReadL),y
+    sta $4C29,X
+    iny
+    lda (tileReadL),y
+    sta $5028,X
+    iny
+    lda (tileReadL),y
+    sta $5029,X
+    iny
+    lda (tileReadL),y
+    sta $5428,X
+    iny
+    lda (tileReadL),y
+    sta $5429,X
+    iny
+    lda (tileReadL),y
+    sta $5828,X
+    iny
+    lda (tileReadL),y
+    sta $5829,X
+    iny
+    lda (tileReadL),y
+    sta $5C28,X
+    iny
+    lda (tileReadL),y
+    sta $5C29,X
+    rts
+.endproc
+
+;-----------------------------------------------------------------------------
+.proc tileDrawP0R9
+    tileReadL      = dstPtrL                    ; tile to draw's data
+    tileReadH      = dstPtrH
+
+    lda (tileReadL),y
+    sta $20A8,X
+    iny
+    lda (tileReadL),y
+    sta $20A9,X
+    iny
+    lda (tileReadL),y
+    sta $24A8,X
+    iny
+    lda (tileReadL),y
+    sta $24A9,X
+    iny
+    lda (tileReadL),y
+    sta $28A8,X
+    iny
+    lda (tileReadL),y
+    sta $28A9,X
+    iny
+    lda (tileReadL),y
+    sta $2CA8,X
+    iny
+    lda (tileReadL),y
+    sta $2CA9,X
+    iny
+    lda (tileReadL),y
+    sta $30A8,X
+    iny
+    lda (tileReadL),y
+    sta $30A9,X
+    iny
+    lda (tileReadL),y
+    sta $34A8,X
+    iny
+    lda (tileReadL),y
+    sta $34A9,X
+    iny
+    lda (tileReadL),y
+    sta $38A8,X
+    iny
+    lda (tileReadL),y
+    sta $38A9,X
+    iny
+    lda (tileReadL),y
+    sta $3CA8,X
+    iny
+    lda (tileReadL),y
+    sta $3CA9,X
+    rts
+.endproc
+
+;-----------------------------------------------------------------------------
+.proc tileDrawP1R9
+    tileReadL      = dstPtrL                    ; tile to draw's data
+    tileReadH      = dstPtrH
+
+    lda (tileReadL),y
+    sta $40A8,X
+    iny
+    lda (tileReadL),y
+    sta $40A9,X
+    iny
+    lda (tileReadL),y
+    sta $44A8,X
+    iny
+    lda (tileReadL),y
+    sta $44A9,X
+    iny
+    lda (tileReadL),y
+    sta $48A8,X
+    iny
+    lda (tileReadL),y
+    sta $48A9,X
+    iny
+    lda (tileReadL),y
+    sta $4CA8,X
+    iny
+    lda (tileReadL),y
+    sta $4CA9,X
+    iny
+    lda (tileReadL),y
+    sta $50A8,X
+    iny
+    lda (tileReadL),y
+    sta $50A9,X
+    iny
+    lda (tileReadL),y
+    sta $54A8,X
+    iny
+    lda (tileReadL),y
+    sta $54A9,X
+    iny
+    lda (tileReadL),y
+    sta $58A8,X
+    iny
+    lda (tileReadL),y
+    sta $58A9,X
+    iny
+    lda (tileReadL),y
+    sta $5CA8,X
+    iny
+    lda (tileReadL),y
+    sta $5CA9,X
+    rts
+.endproc
+
+;-----------------------------------------------------------------------------
+.proc tileDrawP0RA
+    tileReadL      = dstPtrL                    ; tile to draw's data
+    tileReadH      = dstPtrH
+
+    lda (tileReadL),y
+    sta $2128,X
+    iny
+    lda (tileReadL),y
+    sta $2129,X
+    iny
+    lda (tileReadL),y
+    sta $2528,X
+    iny
+    lda (tileReadL),y
+    sta $2529,X
+    iny
+    lda (tileReadL),y
+    sta $2928,X
+    iny
+    lda (tileReadL),y
+    sta $2929,X
+    iny
+    lda (tileReadL),y
+    sta $2D28,X
+    iny
+    lda (tileReadL),y
+    sta $2D29,X
+    iny
+    lda (tileReadL),y
+    sta $3128,X
+    iny
+    lda (tileReadL),y
+    sta $3129,X
+    iny
+    lda (tileReadL),y
+    sta $3528,X
+    iny
+    lda (tileReadL),y
+    sta $3529,X
+    iny
+    lda (tileReadL),y
+    sta $3928,X
+    iny
+    lda (tileReadL),y
+    sta $3929,X
+    iny
+    lda (tileReadL),y
+    sta $3D28,X
+    iny
+    lda (tileReadL),y
+    sta $3D29,X
+    rts
+.endproc
+
+;-----------------------------------------------------------------------------
+.proc tileDrawP1RA
+    tileReadL      = dstPtrL                    ; tile to draw's data
+    tileReadH      = dstPtrH
+
+    lda (tileReadL),y
+    sta $4128,X
+    iny
+    lda (tileReadL),y
+    sta $4129,X
+    iny
+    lda (tileReadL),y
+    sta $4528,X
+    iny
+    lda (tileReadL),y
+    sta $4529,X
+    iny
+    lda (tileReadL),y
+    sta $4928,X
+    iny
+    lda (tileReadL),y
+    sta $4929,X
+    iny
+    lda (tileReadL),y
+    sta $4D28,X
+    iny
+    lda (tileReadL),y
+    sta $4D29,X
+    iny
+    lda (tileReadL),y
+    sta $5128,X
+    iny
+    lda (tileReadL),y
+    sta $5129,X
+    iny
+    lda (tileReadL),y
+    sta $5528,X
+    iny
+    lda (tileReadL),y
+    sta $5529,X
+    iny
+    lda (tileReadL),y
+    sta $5928,X
+    iny
+    lda (tileReadL),y
+    sta $5929,X
+    iny
+    lda (tileReadL),y
+    sta $5D28,X
+    iny
+    lda (tileReadL),y
+    sta $5D29,X
+    rts
+.endproc
+
+;-----------------------------------------------------------------------------
+.proc tileDrawP0RB
+    tileReadL      = dstPtrL                     ; tile to draw's data
+    tileReadH      = dstPtrH
+
+    lda (tileReadL),y
+    sta $21A8,X
+    iny
+    lda (tileReadL),y
+    sta $21A9,X
+    iny
+    lda (tileReadL),y
+    sta $25A8,X
+    iny
+    lda (tileReadL),y
+    sta $25A9,X
+    iny
+    lda (tileReadL),y
+    sta $29A8,X
+    iny
+    lda (tileReadL),y
+    sta $29A9,X
+    iny
+    lda (tileReadL),y
+    sta $2DA8,X
+    iny
+    lda (tileReadL),y
+    sta $2DA9,X
+    iny
+    lda (tileReadL),y
+    sta $31A8,X
+    iny
+    lda (tileReadL),y
+    sta $31A9,X
+    iny
+    lda (tileReadL),y
+    sta $35A8,X
+    iny
+    lda (tileReadL),y
+    sta $35A9,X
+    iny
+    lda (tileReadL),y
+    sta $39A8,X
+    iny
+    lda (tileReadL),y
+    sta $39A9,X
+    iny
+    lda (tileReadL),y
+    sta $3DA8,X
+    iny
+    lda (tileReadL),y
+    sta $3DA9,X
+    rts
+.endproc
+
+;-----------------------------------------------------------------------------
+.proc tileDrawP1RB
+    tileReadL      = dstPtrL                     ; tile to draw's data
+    tileReadH      = dstPtrH
+
+    lda (tileReadL),y
+    sta $41A8,X
+    iny
+    lda (tileReadL),y
+    sta $41A9,X
+    iny
+    lda (tileReadL),y
+    sta $45A8,X
+    iny
+    lda (tileReadL),y
+    sta $45A9,X
+    iny
+    lda (tileReadL),y
+    sta $49A8,X
+    iny
+    lda (tileReadL),y
+    sta $49A9,X
+    iny
+    lda (tileReadL),y
+    sta $4DA8,X
+    iny
+    lda (tileReadL),y
+    sta $4DA9,X
+    iny
+    lda (tileReadL),y
+    sta $51A8,X
+    iny
+    lda (tileReadL),y
+    sta $51A9,X
+    iny
+    lda (tileReadL),y
+    sta $55A8,X
+    iny
+    lda (tileReadL),y
+    sta $55A9,X
+    iny
+    lda (tileReadL),y
+    sta $59A8,X
+    iny
+    lda (tileReadL),y
+    sta $59A9,X
+    iny
+    lda (tileReadL),y
+    sta $5DA8,X
+    iny
+    lda (tileReadL),y
+    sta $5DA9,X
+    rts
+.endproc
+
+;-----------------------------------------------------------------------------
+.proc tileDrawP0RC
+    tileReadL      = dstPtrL                    ; tile to draw's data
+    tileReadH      = dstPtrH
+
+    lda (tileReadL),y
+    sta $2228,X
+    iny
+    lda (tileReadL),y
+    sta $2229,X
+    iny
+    lda (tileReadL),y
+    sta $2628,X
+    iny
+    lda (tileReadL),y
+    sta $2629,X
+    iny
+    lda (tileReadL),y
+    sta $2A28,X
+    iny
+    lda (tileReadL),y
+    sta $2A29,X
+    iny
+    lda (tileReadL),y
+    sta $2E28,X
+    iny
+    lda (tileReadL),y
+    sta $2E29,X
+    iny
+    lda (tileReadL),y
+    sta $3228,X
+    iny
+    lda (tileReadL),y
+    sta $3229,X
+    iny
+    lda (tileReadL),y
+    sta $3628,X
+    iny
+    lda (tileReadL),y
+    sta $3629,X
+    iny
+    lda (tileReadL),y
+    sta $3A28,X
+    iny
+    lda (tileReadL),y
+    sta $3A29,X
+    iny
+    lda (tileReadL),y
+    sta $3E28,X
+    iny
+    lda (tileReadL),y
+    sta $3E29,X
+    rts
+.endproc
+
+;-----------------------------------------------------------------------------
+.proc tileDrawP1RC
+    tileReadL      = dstPtrL                    ; tile to draw's data
+    tileReadH      = dstPtrH
+
+    lda (tileReadL),y
+    sta $4228,X
+    iny
+    lda (tileReadL),y
+    sta $4229,X
+    iny
+    lda (tileReadL),y
+    sta $4628,X
+    iny
+    lda (tileReadL),y
+    sta $4629,X
+    iny
+    lda (tileReadL),y
+    sta $4A28,X
+    iny
+    lda (tileReadL),y
+    sta $4A29,X
+    iny
+    lda (tileReadL),y
+    sta $4E28,X
+    iny
+    lda (tileReadL),y
+    sta $4E29,X
+    iny
+    lda (tileReadL),y
+    sta $5228,X
+    iny
+    lda (tileReadL),y
+    sta $5229,X
+    iny
+    lda (tileReadL),y
+    sta $5628,X
+    iny
+    lda (tileReadL),y
+    sta $5629,X
+    iny
+    lda (tileReadL),y
+    sta $5A28,X
+    iny
+    lda (tileReadL),y
+    sta $5A29,X
+    iny
+    lda (tileReadL),y
+    sta $5E28,X
+    iny
+    lda (tileReadL),y
+    sta $5E29,X
+    rts
+.endproc
+
+;-----------------------------------------------------------------------------
+.proc tileDrawP0RD
+    tileReadL      = dstPtrL                     ; tile to draw's data
+    tileReadH      = dstPtrH
+
+    lda (tileReadL),y
+    sta $22A8,X
+    iny
+    lda (tileReadL),y
+    sta $22A9,X
+    iny
+    lda (tileReadL),y
+    sta $26A8,X
+    iny
+    lda (tileReadL),y
+    sta $26A9,X
+    iny
+    lda (tileReadL),y
+    sta $2AA8,X
+    iny
+    lda (tileReadL),y
+    sta $2AA9,X
+    iny
+    lda (tileReadL),y
+    sta $2EA8,X
+    iny
+    lda (tileReadL),y
+    sta $2EA9,X
+    iny
+    lda (tileReadL),y
+    sta $32A8,X
+    iny
+    lda (tileReadL),y
+    sta $32A9,X
+    iny
+    lda (tileReadL),y
+    sta $36A8,X
+    iny
+    lda (tileReadL),y
+    sta $36A9,X
+    iny
+    lda (tileReadL),y
+    sta $3AA8,X
+    iny
+    lda (tileReadL),y
+    sta $3AA9,X
+    iny
+    lda (tileReadL),y
+    sta $3EA8,X
+    iny
+    lda (tileReadL),y
+    sta $3EA9,X
+    rts
+.endproc
+
+;-----------------------------------------------------------------------------
+.proc tileDrawP1RD
+    tileReadL      = dstPtrL                     ; tile to draw's data
+    tileReadH      = dstPtrH
+
+    lda (tileReadL),y
+    sta $42A8,X
+    iny
+    lda (tileReadL),y
+    sta $42A9,X
+    iny
+    lda (tileReadL),y
+    sta $46A8,X
+    iny
+    lda (tileReadL),y
+    sta $46A9,X
+    iny
+    lda (tileReadL),y
+    sta $4AA8,X
+    iny
+    lda (tileReadL),y
+    sta $4AA9,X
+    iny
+    lda (tileReadL),y
+    sta $4EA8,X
+    iny
+    lda (tileReadL),y
+    sta $4EA9,X
+    iny
+    lda (tileReadL),y
+    sta $52A8,X
+    iny
+    lda (tileReadL),y
+    sta $52A9,X
+    iny
+    lda (tileReadL),y
+    sta $56A8,X
+    iny
+    lda (tileReadL),y
+    sta $56A9,X
+    iny
+    lda (tileReadL),y
+    sta $5AA8,X
+    iny
+    lda (tileReadL),y
+    sta $5AA9,X
+    iny
+    lda (tileReadL),y
+    sta $5EA8,X
+    iny
+    lda (tileReadL),y
+    sta $5EA9,X
+    rts
+.endproc
+
+;-----------------------------------------------------------------------------
+.proc tileDrawP0RE
+    tileReadL      = dstPtrL                    ; tile to draw's data
+    tileReadH      = dstPtrH
+
+    lda (tileReadL),y
+    sta $2328,X
+    iny
+    lda (tileReadL),y
+    sta $2329,X
+    iny
+    lda (tileReadL),y
+    sta $2728,X
+    iny
+    lda (tileReadL),y
+    sta $2729,X
+    iny
+    lda (tileReadL),y
+    sta $2B28,X
+    iny
+    lda (tileReadL),y
+    sta $2B29,X
+    iny
+    lda (tileReadL),y
+    sta $2F28,X
+    iny
+    lda (tileReadL),y
+    sta $2F29,X
+    iny
+    lda (tileReadL),y
+    sta $3328,X
+    iny
+    lda (tileReadL),y
+    sta $3329,X
+    iny
+    lda (tileReadL),y
+    sta $3728,X
+    iny
+    lda (tileReadL),y
+    sta $3729,X
+    iny
+    lda (tileReadL),y
+    sta $3B28,X
+    iny
+    lda (tileReadL),y
+    sta $3B29,X
+    iny
+    lda (tileReadL),y
+    sta $3F28,X
+    iny
+    lda (tileReadL),y
+    sta $3F29,X
+    rts
+.endproc
+
+;-----------------------------------------------------------------------------
+.proc tileDrawP1RE
+    tileReadL      = dstPtrL                    ; tile to draw's data
+    tileReadH      = dstPtrH
+
+    lda (tileReadL),y
+    sta $4328,X
+    iny
+    lda (tileReadL),y
+    sta $4329,X
+    iny
+    lda (tileReadL),y
+    sta $4728,X
+    iny
+    lda (tileReadL),y
+    sta $4729,X
+    iny
+    lda (tileReadL),y
+    sta $4B28,X
+    iny
+    lda (tileReadL),y
+    sta $4B29,X
+    iny
+    lda (tileReadL),y
+    sta $4F28,X
+    iny
+    lda (tileReadL),y
+    sta $4F29,X
+    iny
+    lda (tileReadL),y
+    sta $5328,X
+    iny
+    lda (tileReadL),y
+    sta $5329,X
+    iny
+    lda (tileReadL),y
+    sta $5728,X
+    iny
+    lda (tileReadL),y
+    sta $5729,X
+    iny
+    lda (tileReadL),y
+    sta $5B28,X
+    iny
+    lda (tileReadL),y
+    sta $5B29,X
+    iny
+    lda (tileReadL),y
+    sta $5F28,X
+    iny
+    lda (tileReadL),y
+    sta $5F29,X
+    rts
+.endproc
+
+;-----------------------------------------------------------------------------
+.proc tileDrawP0RF
+    tileReadL      = dstPtrL                    ; tile to draw's data
+    tileReadH      = dstPtrH
+
+    lda (tileReadL),y
+    sta $23A8,X
+    iny
+    lda (tileReadL),y
+    sta $23A9,X
+    iny
+    lda (tileReadL),y
+    sta $27A8,X
+    iny
+    lda (tileReadL),y
+    sta $27A9,X
+    iny
+    lda (tileReadL),y
+    sta $2BA8,X
+    iny
+    lda (tileReadL),y
+    sta $2BA9,X
+    iny
+    lda (tileReadL),y
+    sta $2FA8,X
+    iny
+    lda (tileReadL),y
+    sta $2FA9,X
+    iny
+    lda (tileReadL),y
+    sta $33A8,X
+    iny
+    lda (tileReadL),y
+    sta $33A9,X
+    iny
+    lda (tileReadL),y
+    sta $37A8,X
+    iny
+    lda (tileReadL),y
+    sta $37A9,X
+    iny
+    lda (tileReadL),y
+    sta $3BA8,X
+    iny
+    lda (tileReadL),y
+    sta $3BA9,X
+    iny
+    lda (tileReadL),y
+    sta $3FA8,X
+    iny
+    lda (tileReadL),y
+    sta $3FA9,X
+    rts
+.endproc
+
+;-----------------------------------------------------------------------------
+.proc tileDrawP1RF
+    tileReadL      = dstPtrL                    ; tile to draw's data
+    tileReadH      = dstPtrH
+
+    lda (tileReadL),y
+    sta $43A8,X
+    iny
+    lda (tileReadL),y
+    sta $43A9,X
+    iny
+    lda (tileReadL),y
+    sta $47A8,X
+    iny
+    lda (tileReadL),y
+    sta $47A9,X
+    iny
+    lda (tileReadL),y
+    sta $4BA8,X
+    iny
+    lda (tileReadL),y
+    sta $4BA9,X
+    iny
+    lda (tileReadL),y
+    sta $4FA8,X
+    iny
+    lda (tileReadL),y
+    sta $4FA9,X
+    iny
+    lda (tileReadL),y
+    sta $53A8,X
+    iny
+    lda (tileReadL),y
+    sta $53A9,X
+    iny
+    lda (tileReadL),y
+    sta $57A8,X
+    iny
+    lda (tileReadL),y
+    sta $57A9,X
+    iny
+    lda (tileReadL),y
+    sta $5BA8,X
+    iny
+    lda (tileReadL),y
+    sta $5BA9,X
+    iny
+    lda (tileReadL),y
+    sta $5FA8,X
+    iny
+    lda (tileReadL),y
+    sta $5FA9,X
+    rts
+.endproc
+
+;-----------------------------------------------------------------------------
 .proc screenDrawSprites
 
     count = sizeL
 
     ldx numSprites                              ; render the AI
     dex                                         ; ignore the door
-    stx count 
+    stx count
 :
     jsr screenDrawSprite
     dec count
     ldx count
     bpl :-
 
-    rts 
+    rts
 
-.endproc 
+.endproc
 
 ;-----------------------------------------------------------------------------
-.proc screenDrawSprite 
+.proc screenDrawSprite
 
     col   = sizeH
     lines = tmpBot +  0
@@ -513,22 +2177,22 @@ done:
     sta read + 1                                ; in case of left clipping, reset read
     lda #3
     sta stripLen + 1                            ; in case of right clipping, reset length
-    
+
     lda spriteXPos, x                           ; col in 0..31 range
-    sec 
+    sec
     sbc leftEdge                                ; move by the left edge
     bpl leftOK                                  ; if ge 0 then no clipping left
-    cmp #$ff 
-    beq lClip 
+    cmp #$ff
+    beq lClip
 
 drawOffScreen:
-    sta lines 
-    lda spriteClass, x 
+    sta lines
+    lda spriteClass, x
     bit CLASS_MOVE_Y
     beq :+                                      ; if yes, ignore
     jmp screenDrawOffscreenSprite               ; an off-screen amoeba gets an indicator
 :
-    rts 
+    rts
 
 lClip:
     lda #2
@@ -548,18 +2212,18 @@ rClip:
     lda #1
     sta stripLen + 1
     lda #19
-    
+
 rightOK:
     asl                                         ; multiply times 2
     sta col                                     ; screen column for where to start draw
 
-    lda spriteFrame, x 
-    adc spriteFramesIdx, x 
-    tay 
+    lda spriteFrame, x
+    adc spriteFramesIdx, x
+    tay
     lda mult64H, y                              ; and add the 64 * frame hi
     adc #>spriteInstances                       ; add the hi offset
     sta read + 2
-    lda mult64L, y 
+    lda mult64L, y
     adc #<spriteInstances
     bcc :+
     inc read + 2
@@ -569,7 +2233,7 @@ rightOK:
     sta read + 1
 
     lda spriteYPos, x                           ; get the y position of the sprite
-    tay 
+    tay
 
     lda #16                                     ; sprites are 16 high
     sta lines
@@ -578,7 +2242,7 @@ loop:
     lda col                                     ; start with the column
     adc rowL, y                                 ; add the row start
     sta write + 1
-    lda rowH, y 
+    lda rowH, y
     adc currPageH                               ; and the page
     sta write + 2                               ; write points at the line to copy 4 bytes to
 
@@ -588,7 +2252,7 @@ read:
     lda PLACEHOLDER, x                          ; get the bytes from src instance
 write:
     sta PLACEHOLDER, x                          ; put them on screen
-    dex 
+    dex
     bpl read                                    ; do all the bytes
     dec lines                                   ; one more line done
     beq done
@@ -597,15 +2261,15 @@ write:
     sta read + 1
     bcc :+
     inc read + 2
-    clc 
+    clc
 :
     iny                                         ; and go to next line
     bne loop                                    ; BRA
 
 done:
-    rts 
+    rts
 
-.endproc 
+.endproc
 
 ;-----------------------------------------------------------------------------
 ; used where vertical sprites are off-screen.  Sometimes it matters to gameplay
@@ -615,7 +2279,7 @@ done:
     distance = tmpBot + 0
     color    = tmpBot + 1
     col      = tmpBot + 2
-    
+
     lda distance
     bmi leftSide                                ; if negative, off on the left
     sbc #20                                     ; make 0 based distance
@@ -654,8 +2318,8 @@ drawBlock:
 :
     lda col                                     ; start with the column
     adc rowL, y                                 ; calculate the byte address for the row
-    sta write + 1 
-    lda rowH, y 
+    sta write + 1
+    lda rowH, y
     adc currPageH                               ; include the hires buffer
     sta write + 2                               ; and save that as a write destination
 
@@ -669,7 +2333,7 @@ write:
 done:
     rts
 
-.endproc 
+.endproc
 
 ;-----------------------------------------------------------------------------
 .proc screenDrawLives
@@ -684,17 +2348,17 @@ done:
 
 :
     lda #0
-    sta allDone 
+    sta allDone
 
     lda livesFrame                              ; get the animation frame
-    lsr 
-    lsr 
-    tay 
+    lsr
+    lsr
+    tay
     lda mult64L, y                              ; mult 64
-    clc 
+    clc
     adc #<sprites                               ; and add the sprite (willy) offset
-    sta srcPtrL 
-    lda mult64H, y 
+    sta srcPtrL
+    lda mult64H, y
     adc #>sprites
     sta srcPtrH                                 ; save as srcPtr
 
@@ -718,7 +2382,7 @@ loop:
     lda sizeH                                   ; start with the column
     adc rowL, y                                 ; add the row start
     sta write + 1
-    lda rowH, y 
+    lda rowH, y
     adc currPageH                               ; and the page
     sta write + 2                               ; "write" points at the line to copy 4 bytes to
 
@@ -727,7 +2391,7 @@ read:
     lda PLACEHOLDER, x                          ; get the willy bytes
 write:
     sta PLACEHOLDER, x                          ; put them on screen
-    dex 
+    dex
     bpl read                                    ; do all the bytes
     dec dstPtrL                                 ; one more line done
     beq next                                    ; all lines done, see if more lives to draw
@@ -736,7 +2400,7 @@ write:
     sta read + 1
     bcc :+
     inc read + 2
-    clc 
+    clc
 :
     iny                                         ; and go to next line
     bne loop                                    ; BRA
@@ -758,7 +2422,7 @@ maybeCheat:
     sta allDone                                 ; set sentinel
 
     ldx lives                                   ; get the column to draw the boot
-    txa 
+    txa
     asl                                         ; mult * 4 to set them apart
     asl
     sta sizeH                                   ; store the column in sizeH
@@ -773,91 +2437,86 @@ maybeCheat:
     sta read + 2
     jmp loop
 
-.endproc 
+.endproc
 
 ;-----------------------------------------------------------------------------
 .proc screenDrawWilly
 
-    count     = sizeL
+    row       = sizeL
     col       = sizeH
     lines     = tmpBot + 0
     willyByte = tmpBot + 1
     collision = tmpBot + 2
+    detection = tmpBot + 3
 
-    lda #0
-    sta collision
-
+    sta detection
+    lda willyYPos                               ; get the y position of the sprite
+    sta row 
     lda willyXPos                               ; col in 0..31 range
-    sec 
+    sec
     sbc leftEdge                                ; move by the left edge
     asl                                         ; multiply times 2
     sta col                                     ; screen column for where to start draw
+    lda #16                                     ; sprites are 16 high
+    sta lines
+    ldx #0                                      ; index into willy sprite data
+    stx collision                               ; clear collision counter
 
-    lda willyFrame                              ; get the frame
-    tay                                         ; index through y
+    ldy willyFrame                              ; get the frame
     lda mult64L, y                              ; get the frame * 64 lo
-
     adc #<sprite00                              ; add instance base address
     sta willyRead + 1                           ; save as the lo src ptr
-
     lda #>sprite00                              ; add the hi offset
     adc mult64H, y                              ; and add the 64 * frame hi
     sta willyRead + 2                           ; willyRead now a pointer at the frame to show
 
-    lda willyYPos                               ; get the y position of the sprite
-    tay 
-
-    lda #16                                     ; sprites are 16 high
-    sta lines
-
-loop:
+rowSetup:
+    clc
+    ldy row                                     ; current row to draw
     lda col                                     ; start with the column
     adc rowL, y                                 ; add the row start
-    sta screenRead + 1
-    sta write + 1
-    lda rowH, y 
+    sta dstPtrL
+    lda rowH, y
     adc currPageH                               ; and the page
-    sta screenRead + 2                          ; write points at the line to copy 4 bytes to
-    sta write + 2                               ; write points at the line to copy 4 bytes to
-
-stripLen:
-    ldx #3                                      ; copy offsets 0..3
+    sta dstPtrH                                 ; write points at the line to copy 4 bytes to
+preWillyRead: 
+    ldy #0                                      ; willy is 4 bytes wide
 willyRead:
-    lda PLACEHOLDER, x                          ; get the bytes from src instance
-    sta willyByte
-screenRead:
-    lda PLACEHOLDER, x 
-    eor willyByte
-write:
-    sta PLACEHOLDER, x                          ; put them on screen
-    and willyByte
-    cmp willyByte 
-    beq :+
-    inc collision
-:
-    dex 
-    bpl willyRead                               ; do all the bytes
-    dec lines                                   ; one more line done
-    beq done
+    lda PLACEHOLDER, x                          ; read a willy sprite byte
+    beq nextCol                                 ; ignore the 0 bytes
+    bit detection
+    bne doDetect
+    ora (dstPtrL), y                            ; add the screen byte
+    sta (dstPtrL), y                            ; store it back
+    bne nextCol                                 ; bra
+doDetect:
+    sta willyByte                               ; save the byte
+    eor (dstPtrL), y                            ; add the screen byte
+    sta (dstPtrL), y                            ; store it back
+    and willyByte                               ; see if willy overlaps
+    cmp willyByte
+    beq nextCol                                 ; if not changed, no collision
+    inc collision                               ; there was a collision
+nextCol:
+    inx                                         ; advance to next byte
+    iny                                         ; next column
+    cpy #4
+    bcc willyRead                               ; still in a row doing columns
+    dec lines                                   ; one less line to render
+    beq done                                    ; if no lines left then done
+    inc row                                     ; next row
+    lda row                                     ; test to see if the row is at an address that needs lookup
+    and #7 
+    beq rowSetup
+    lda dstPtrH                                 ; move down by $400 to next row
     clc
-    lda willyRead + 1                           ; not all done, advance read by 4 bytes
-    adc #4
-    sta willyRead + 1
-    bcc :+
-    inc willyRead + 2
-    clc 
-:
-    iny                                         ; and go to next line
-    bne loop                                    ; BRA
-
+    adc #$04
+    sta dstPtrH
+    bne preWillyRead                            ; bra
 done:
     lda collision
-    beq :+
-    sec 
-    rts 
-: 
-    clc 
-    rts 
+    cmp #1
+    rts
 
 .endproc 
 
@@ -872,9 +2531,9 @@ done:
     colR      = tmpBot + 4
 
     jsr screenSwap::valueSwap
-    
+
     ldx colIdx                                  ; load the color mask based on the index
-    lda masksLeft, x 
+    lda masksLeft, x
     sta colL
     lda masksRight, x
     sta colR
@@ -887,10 +2546,10 @@ done:
 
 rowLoop:
     ldy hiresRows                               ; init the pointer to the top line of the hires row
-    lda rowL, y 
-    sta dstPtrL 
+    lda rowL, y
+    sta dstPtrL
     lda currPageH
-    adc rowH, y 
+    adc rowH, y
     sta dstPtrH
 
     ldy #2 * (VISIBLE_COLS - 1)                 ; start at column 38
@@ -911,7 +2570,7 @@ colLoop:
     beq :+                                      ; all done?
     lda dstPtrH                                 ; not yet
     adc #4                                      ; move hires row down by 1
-    sta dstPtrH 
+    sta dstPtrH
     bne :-                                      ; BRA to do all 8 hires rows
 :
     lda dstPtrH                                 ; move the hires ptr back to the top row
@@ -924,10 +2583,10 @@ next:
     dey                                         ; move to the prev col right
     dey                                         ; and move to the prev col left
     bpl colLoop                                 ; and repeat for all columns ge 0
-    
+
     dec rows                                    ; done a row
     beq done                                    ; stop when all rows done
-    
+
     lda hiresRows                               ; more to do so move the hires
     clc                                         ; starting row down by 8 to be at the
     adc #8                                      ; start of the next "text" row
@@ -938,7 +2597,7 @@ done:
     jsr screenSwap::valueSwap                   ; put the screen buffer info back
     rts                                         ; all done
 
-.endproc 
+.endproc
 
 ;-----------------------------------------------------------------------------
 .proc screenSolarBeam
@@ -961,7 +2620,7 @@ done:
     sta isWilly
 
     lda #23                                     ; column where solar beam starts
-    sta column 
+    sta column
     sta worldPtrL                               ; also the column in levelLayout (aligned in mem)
     lda #>levelLayout                           ; make worldPtr point at the start of the beam
     sta worldPtrH
@@ -984,7 +2643,7 @@ beamLeft:
 :
     ldx numSprites                              ; need to see if beam hits a sprite (not door) to bend
 checkLoop:
-    dex 
+    dex
     bmi checkCollision                          ; checked all sprites
     lda spriteXPos, x                           ; get the sprite x
     cmp column                                  ; compare to the beam x
@@ -1009,22 +2668,22 @@ onScreen:
     lda willyYPos                               ; see if the beam intersects willy
     adc #16                                     ; if willyY + 16 >= row and willyY <= row + 8
     cmp row                                     ; then willy intersects in Y
-    bcc drawBlock 
+    bcc drawBlock
     clc
-    lda row 
+    lda row
     adc #8
-    cmp willyYPos 
-    bcc drawBlock 
+    cmp willyYPos
+    bcc drawBlock
     lda column                                  ; if col >= willyX and col < willyX + 3
     cmp willyXPos                               ; then willy intersects in X also, so hitting willy
-    bcc drawBlock 
-    lda willyXPos 
-    clc 
+    bcc drawBlock
+    lda willyXPos
+    clc
     adc #2
-    cmp column 
-    bcc drawBlock 
+    cmp column
+    bcc drawBlock
     sta isWilly                                 ; set isWIlly to true when hitting willy
-    clc 
+    clc
 
 drawBlock:
     ldy row                                     ; set up to draw
@@ -1032,7 +2691,7 @@ drawBlock:
     asl                                         ; which is 2 bytes per column
     adc rowL, y
     sta screenPtrL
-    lda rowH, y 
+    lda rowH, y
     adc currPageH
     sta screenPtrH
 
@@ -1053,7 +2712,7 @@ nocol:
     inc collision
 :
     ora #%11010101
-    sta (screenPtrL), y 
+    sta (screenPtrL), y
 
     dey                                         ; set y back to 0
     dex                                         ; done one more row
@@ -1073,7 +2732,7 @@ checkCollision:
     sta airFlow
 :
     lda #0                                      ; willy was hit so reset locals
-    sta isWilly 
+    sta isWilly
     beq setCollision                            ; go move the beam
 chkDirChng:
     lda collision                               ; see if there was a collision
@@ -1097,10 +2756,10 @@ left:
     jmp checkWorld                              ; see that the new location isn't a world tile
 
 down:
-    clc 
+    clc
     lda row                                     ; move the row
     adc #8                                      ; down by 8 (1 block height)
-    sta row 
+    sta row
     lda worldPtrL                               ; and move the world pointer as well
     adc #32
     sta worldPtrL
