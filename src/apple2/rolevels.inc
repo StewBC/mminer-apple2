@@ -225,7 +225,7 @@ levelsH:
 ; the level.  The switch looks the same in both kong levels (only place it
 ; is present) so it doesn't need/get an entry.  The door "tile" isn't seen,
 ; so isn't rendered.  It's below the door sprite for collision purposes only.
-; 
+;
 ; floor1, floor2, conveyor, wall, bush, rock, collapse, key - door & switch not here
 levelTiles:
 .byte $31, $00, $1C, $1F, $0D, $28, $27, $09    ; Level 1
@@ -278,8 +278,9 @@ levelMasks:
 .byte $01, $02, $00, $02, $01, $02, $04, $00    ; Level 19
 .byte $02, $02, $04, $01, $00, $02, $04, $00    ; Level 20
 
+; The number of bytes to skip when calling a tileDrawP*R* routine for a collapsing platform
 collapseHeight:
-.byte 8, 7, 6, 5, 4, 3, 2, 1 
+.byte 12*0, 12*1, 12*2, 12*3, 12*4, 12*5, 12*6, 12*7
 
 conveyorDirections:
 .byte 2, 1, 2, 1, 2, 2, 2, 1, 1, 2, 2, 1, 1, 2
