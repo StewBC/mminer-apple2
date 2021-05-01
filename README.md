@@ -110,7 +110,7 @@ approximate.
 
 Hex | Dec | Frame % | Item
 --- | --- | --- | ---
-1267f | 75391 | 100% | Total Frame
+1267F | 75391 | 100% | Total Frame
 18 | 24 | 0% | inputGet
 E8 | 232 | 0% | willyMove
 80 | 128 | 0% | gameAI
@@ -118,14 +118,14 @@ E8 | 232 | 0% | willyMove
 123 | 291 | 0% | tilesAnimateKeys
 47 | 71 | 0% | tilesAnimateConveyor
 6EB | 1771 | 2% | screenDrawSprites
-a07 | 2567 | 3% | screenDrawWilly
-71d7 | 29143 | 39% | screenDrawLevel
-8d1 | 2257 | 3% | screenDrawWilly
+A07 | 2567 | 3% | screenDrawWilly (collision)
+71D7 | 29143 | 39% | screenDrawLevel
+8D1 | 2257 | 3% | screenDrawWilly (view)
 3A | 58 | 0% | uiUpdate
-3a | 58 | 0% | screenDrawSprite (door)
+3A | 58 | 0% | screenDrawSprite (door)
 28 | 40 | 0% | screenSwap
-1d1f | 7455 | 10% | audioPlayNote
-1f76 | 8054 | 11% | gameDelay
+1D1F | 7455 | 10% | audioPlayNote
+1F76 | 8054 | 11% | gameDelay
 
 
 As can be seen, clearing the area where the world will be drawn takes almost
