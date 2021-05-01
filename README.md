@@ -1,6 +1,13 @@
 # Manic Miner
  Remake of the ZX Spectrum game for the Apple II.
 
+Updates:
+i. 30 April 2021 - I Sped up rendering for a more even experience, especially
+in The Vat and The Warehouse.  The Apple II vesrsion is marginally slower than
+the ZX Spectrum version (I think - tested with Speccy) but feels pretty good.
+To make room for the fully unrolled level rendering, I sacrificed the lower
+case letters in the font.  I updated the table of timings, below.
+
 1. INTRODUCTION
 
 This is a game I have always loved, from the moment I saw it in a computer shop
@@ -34,7 +41,7 @@ limitation. If I did use some of the ROM memory for RAM, I could probably fix
 this, but I didn't want to trash ProDOS and I didn't want to have to reboot the
 Apple II when the program is quit.
 
-The biggest differences have to do with the screen and keys.  
+The biggest differences have to do with the screen and keys.
 
 The ZX Spectrum has a 32 column, 8 pixel per column, color display (256 pixels).
 The Apple II can only display 20 7-pixel color columns (140 pixels).  This means
@@ -88,35 +95,46 @@ as much as is possible given the limitations.
 4. TECHNICAL DETAILS
 
 The game is written in 6502 assembly language using the ca65 assembler.  The
-game uses memory from $0800 to $B52C.
+game uses memory from $0800 to $BE4B.
 
 Below is a CPU cycle profile of 1 game frame in stage 1 after a couple of
 seconds of being on the level.  The door isn't visible so this renders only the
-one enemy and Willy, as well as the level tiles.  The auidoPlayNote includes an
-artificial delay that's based on the number of tiles rendered.  If I didn't have
-that, the really empty levels such as SkyLab would play the in-game music way
-too fast.  However, this does mean that the game experience is smoother with the
-music turned off, since there's no artificial delay.
+one enemy and Willy, as well as the level tiles.  gameDelay is an artificial
+delay based on how many tiles were rendered, which smooths out the gameplay,
+and thus song tempo across levels.  If the music is turned off, audioPlayNote
+will also create an artificial delay to simulate the delay incurred by
+toggling the speaker.
 
-Hex | Dec | Frame % | Item
---- | --- | --- | ---
-19C3E | 105534 | 100% | Total Frame
+Cycle counts are not constant across all frames so all timings below are
+approximate.
+
+Hex | Dec | Frame % | Item
+--- | --- | --- | ---
+1267f | 75391 | 100% | Total Frame
 18 | 24 | 0% | inputGet
 E8 | 232 | 0% | willyMove
 80 | 128 | 0% | gameAI
-5EF3 | 24307 | 23% | screenClear
+5EF3 | 24307 | 32% | screenClear
 123 | 291 | 0% | tilesAnimateKeys
 47 | 71 | 0% | tilesAnimateConveyor
 6EB | 1771 | 2% | screenDrawSprites
-C55 | 3157 | 3% | screenDrawWilly
-C6FD | 50941 | 48% | screenDrawLevel
-DDA | 3546 | 3% | uiUpdate
-3A | 58 | 0% | screenDrawSprite (door)
-26 | 38 | 0% | screenSwap
-51BD | 20925 | 20% | audioPlayNote
+a07 | 2567 | 3% | screenDrawWilly (For collisions)
+71d7 | 29143 | 39% | screenDrawLevel
+8d1 | 2257 | 3% | screenDrawWilly (For display, over level)
+3A | 58 | 0% | uiUpdate
+3a | 58 | 0% | screenDrawSprite (door)
+28 | 40 | 0% | screenSwap
+1d1f | 7455 | 10% | audioPlayNote
+1f76 | 8054 | 11% | gameDelay (sparse vs abundant level draw equalizer)
 
-As can be seen, clearing the area where the world will be drawn takes almost 24%
-of the frame and drawing the level tiles takes about 50% of the frame!
+As can be seen, clearing the area where the world will be drawn takes almost
+32% of the frame and drawing the level tiles takes about 39%, plus 3% to
+re-render willy, of the total frame.  Drawing is almost 80% of the frame.
+
+The ZX Spectrum version had Willy under the level tiles, but I prefer Willy
+in front, so I re-render willy without collision detection once the level tiles
+have been drawn, so he is always in front (but before the door is drawn so he is
+behind the door).
 
 5. KEYS
 
@@ -129,7 +147,7 @@ shows help and keys, but these are the keys:
 * B      - Toggle Black and White / Color mode
 * C      - Toggle scrolling mode
 * M      - Turn the music on/off
-* S      - Turn in-game audio on/off 
+* S      - Turn in-game audio on/off
 * ESC    - Quit level or in UI, return to ProDOS
 
 The game also supports the cheat mode, as in the original.  In game, enter the
@@ -213,23 +231,23 @@ loader.s | file to load and start the game
 7. BUILDING THE GAME
 
 Making the game has a few steps.  Use make and the Makefile on all OSs, that
-would be the easiest.  
+would be the easiest.
 
-Start by making the loader - this needs to be done once only.  
+Start by making the loader - this needs to be done once only.
 make TARGETS=apple2.loader
 
-Next, make the game with:  
+Next, make the game with:
 make
 
 The next step is to make a bootable disk image.  For this, you will need 3rd
 party software.  I use AppleCommander.  This software will put the loader and
-game into the disk image. You will need to install Java to use AppleCommander.  
+game into the disk image. You will need to install Java to use AppleCommander.
 
 The apple2/template.dsk is a "blank ProDOS floppy" that has the loader and the
 game placed on it by AppleCommander.
 
 To make the disc image, set an environment variable to point at apple commander
-(see notes) and then use the command:  
+(see notes) and then use the command:
 make dsk
 
 This will make a disc named mminer.dsk which can be loaded up in an emulator.
@@ -242,29 +260,29 @@ necessary.
 
 If you use AppleWin and you have sed installed, you can also uncomment the
 PREEMUCMD := sed... command which will copy the game symbols to the emulator for
-use.  For that to really make sense, you should to do this make command once: 
+use.  For that to really make sense, you should to do this make command once:
 make OPTIONS=mapfile,labelfile,listing,debugfile.  That will make a file called
-Makefile.options that will be re-used, and will generate a label file with all 
+Makefile.options that will be re-used, and will generate a label file with all
 the labels.
 
 Once done, you can build and play the game with the command: make dsk test
 
 NOTES:
 1) Find AppleCommander here (I used Version 1.6.0):
-https://github.com/AppleCommander/AppleCommander/releases  
+https://github.com/AppleCommander/AppleCommander/releases
 2) Set the environment variable (or change the Makefile-dsk.md) to point at the
-apple commander jar file.  Here's how it's done for different shell's:  
- Powershell:  
-   $env:AC = "path to apple commander.jar"  
- cmd.exe   
-   set AC="path to apple commander.jar"  
- bash (Unix or MacOS terminal):  
-   export AC="path to apple commander.jar"  
+apple commander jar file.  Here's how it's done for different shell's:
+ Powershell:
+   $env:AC = "path to apple commander.jar"
+ cmd.exe
+   set AC="path to apple commander.jar"
+ bash (Unix or MacOS terminal):
+   export AC="path to apple commander.jar"
 
 8. CREDITS
 
 * Matthew Smith and BUG-BYTE for creating and publishing the game in
-  1983.  Matthew later re-released the game with minor tweaks under the 
+  1983.  Matthew later re-released the game with minor tweaks under the
   Software Projects banner.  This is not that version.
 * A special call-out to Oliver Schmidt who provided me with invaluable
   advice and support.
@@ -272,12 +290,13 @@ apple commander jar file.  Here's how it's done for different shell's:
   GIMP exported BMP.
 * Everyone involved in the Apple II projects (AppleWin | AppleCommander).
 * Everyone involved in making the cc65 tools, it's very good.
+* Ian Brumby for showing me how you really unroll a draw loop.
 
 9. CONTACT
 
 Feel free to contact me at swessels@email.com if you have thoughts or
 suggestions.
 
-Thank you  
-Stefan Wessels  
-21 April 2020 - Initial Revision  
+Thank you
+Stefan Wessels
+21 April 2020 - Initial Revision
