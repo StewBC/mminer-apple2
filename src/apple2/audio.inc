@@ -95,24 +95,7 @@ reset:
 
     lda audioMask                               ; see if the music is on
     and #AUDIO_MUSIC
-    bne play
-    
-    ldx #0                                      ; kill approx 6800 cycles (average cycles for playNote when on)
-:
-    nop                                         ; 2 cycles
-    nop                                         ; 4
-    nop                                         ; 6
-    nop                                         ; 8
-    nop                                         ; 10
-    nop                                         ; 12
-    nop                                         ; 14
-    nop                                         ; 16
-    nop                                         ; 18
-    nop                                         ; 20
-    nop                                         ; 22
-    dex                                         ; 24 cycles
-    bne :-                                      ; 26 cycles * 256 = 6656 cycles - close enough
-    rts
+    beq done
 
 play:
     ldx musicL                                  ; get the index into the in-game music
@@ -120,7 +103,7 @@ play:
     lda inGameMusic, x                          ; get the note at the index
     bne :+                                      ; if non-zero it's a valid note
     sta musicL                                  ; reset the index to the start of the song
-    beq :-
+    beq play
 :
     ldy #$08                                    ; fixed number of iterations
 
@@ -128,8 +111,7 @@ freq:                                           ; external entry point for custo
     sta delayTime                               ; store it in a delay counter
     lda audioMask                               ; see if
     and #AUDIO_SOUND                            ; audio is enabled
-    bne loop                                    ; and play or ignore audio accordingly
-    rts
+    beq done                                    ; and play or ignore audio accordingly
 
 loop:
     lda SPEAKER                                 ; toggle the speaker
@@ -140,6 +122,7 @@ loop:
     dey                                         ; then repeat
     bne loop                                    ; for the fixed iterations
 
+done:
     rts                                         ; and return
 
 .endproc

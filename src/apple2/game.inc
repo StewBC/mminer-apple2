@@ -89,13 +89,19 @@ ui:
 ;-----------------------------------------------------------------------------
 .proc gameDelay
 
-    lda #$80                                    ; max tiles ever visible is $CD, but delay only up to $80
-    sec 
-    sbc tilesRendered                           ; how many were shown
-    bcc done                                    
-    tax                                         ; delta in x
+    delayTime = tmpBot + 0
+
+    lda #$10
+    sta delayTime
+
+delayCalc:
+    sec
+    lda #$D0
+    sbc tilesRendered
+    bcc done
+    tax
 :
-    ldy #49                                     ; delay 246 cycles per non-rendered tile
+    ldy delayTime
 :
     dey
     bne :-
@@ -104,7 +110,7 @@ ui:
 done:
     rts
 
-.endproc 
+.endproc
 
 ;-----------------------------------------------------------------------------
 .proc gameNewGame
