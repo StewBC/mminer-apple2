@@ -43,7 +43,7 @@ roTextPressEnter:
 .byte "PRESS ENTER TO START"
 roTextEnter := (roTextPressEnter + 6)
 roTextAppleIIVersion:
-.BYTE "APPLE II  VERSION BY"
+.BYTE " APPLE II  V1.1A BY "
 roTextStefan:
 .BYTE "STEFAN WESSELS, 2020"
 roTextIntro:
