@@ -319,7 +319,7 @@ cameraScroll:
     lda #$0c                                    ; col is 13 or greater, so clamp to 12
 :
     cmp leftEdge                                ; see if the edge needs to move
-    beq :+                                      ; don't move
+    beq done                                      ; don't move
     sta leftEdge                                ; set the new left edge
     lda #UI_COMPONENT_NAME                      ; and mark the name as needing to scroll too
     jsr uiUpdateComponent
