@@ -80,7 +80,7 @@ int             active_page = 0x4000;             // 0x2000 or 0x4000 - active h
 // Global variables to emulate speaker clicks
 #define SAMPLE_RATE 44100
 int     audio_paused = 1;                         // Audio is paused (1) or playing (0)
-int     speaker_state = 0;                        // Tracks whether the speaker is in the "on" or "off" state
+float   speaker_state = 1.0;                      // Tracks whether the speaker is in the "high" or "low" state
 double  frequency = 440.0;                        // Frequency in Hz (dynamically calculated)
 Uint64  last_toggle_time = 0;                     // Last time the speaker was toggled (in performance counter ticks)
 Uint64  frequency_ticks = 0;                      // Frequency of the performance counter
@@ -105,8 +105,8 @@ void speaker_toggle() {
     // Update the last toggle time
     last_toggle_time = current_time;
 
-    // Toggle the speaker state between 1 (high) and 0 (low)
-    speaker_state = !speaker_state;
+    // Toggle the speaker state between 1 (high) and -1 (low)
+    speaker_state = -speaker_state;
 
     // (re)start the SDL audio
     if(audio_paused) {
@@ -122,19 +122,17 @@ void audio_callback(void* userdata, Uint8* stream, int len) {
     static int sample_index = 0;
 
     // Calculate the number of samples per toggle based on the frequency
-    int samples_per_toggle = (int)(SAMPLE_RATE / (2 * frequency)); // Half-cycle for square wave
+    int samples_per_toggle = (int)(SAMPLE_RATE / (frequency / 1.75));
 
     for (int i = 0; i < length; i += 2) {         // Increment by 2 because of stereo (2 channels)
-        float sample_value = (speaker_state ? 1.0f : -1.0f); // Square wave: +1.0 or -1.0
-
         // Stereo output: Set both left (i) and right (i + 1) channels
-        buffer[i] = sample_value;                 // Left channel
-        buffer[i + 1] = sample_value;             // Right channel
+        buffer[i] = speaker_state;                 // Left channel
+        buffer[i + 1] = speaker_state;             // Right channel
 
         // Toggle speaker state after `samples_per_toggle` samples
         if (++sample_index >= samples_per_toggle) {
             sample_index = 0;                     // Reset the sample index
-            speaker_state = !speaker_state;       // Toggle speaker state (square wave generation)
+            speaker_state = -speaker_state;       // Toggle speaker state (square wave generation)
         }
     }
 }
@@ -376,7 +374,7 @@ int main(int argc, char* argv[]) {
 
         // When the speaker is not being toggled, it needs to turn off
         end_time = SDL_GetPerformanceCounter();
-        if(!audio_paused && end_time - last_toggle_time > (frequency_ticks / 8)) {
+        if(!audio_paused && end_time - last_toggle_time > (frequency_ticks / 32)) {
             audio_paused = 1;
             SDL_PauseAudio(1);
             end_time = SDL_GetPerformanceCounter();
