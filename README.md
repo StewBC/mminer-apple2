@@ -8,7 +8,7 @@ just to run the Apple II version of manic Miner on a modern computer, using
 SDL2.  The speaker audio is terrible, but otherwise it works pretty great.  
 No NTSC artifact colors.  Windows version in RELEASES tab.  
 [The Manic Miner Machine README](src/mmm/README.md)  
-[The Manic Miner Machine Source](src/mmm/)  
+[The Manic Miner Machine Source](src/mmm/src)  
   
 * 30 April 2021  
 I Sped up rendering for a more even experience, especially in The Vat and  
