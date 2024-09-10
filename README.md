@@ -1,13 +1,22 @@
 # Manic Miner
  Remake of the ZX Spectrum game for the Apple II.
 
-Updates:
-i. 30 April 2021 - I Sped up rendering for a more even experience, especially
-in The Vat and The Warehouse.  The Apple II vesrsion is marginally slower than
-the ZX Spectrum version (I think - tested with Speccy) but feels pretty good.
-To make room for the fully unrolled level rendering, I sacrificed the lower
-case letters in the font.  I updated the table of timings, below.
-
+## Updates:
+* 9 September 2024.  
+Check out the Manic Miner Machine!  It's an Apple II "emulator" that I built  
+just to run the Apple II version of manic Miner on a modern computer, using  
+SDL2.  The speaker audio is terrible, but otherwise it works pretty great.  
+No NTSC artifact colors.  Windows version in RELEASES tab.  
+[The Manic Miner Machine README](src/mmm/README.md)  
+[The Manic Miner Machine Source](src/mmm/)  
+  
+* 30 April 2021  
+I Sped up rendering for a more even experience, especially in The Vat and  
+The Warehouse.  The Apple II vesrsion is marginally slower than the  
+ZX Spectrum version (I think - tested with Speccy) but feels pretty good.  
+To make room for the fully unrolled level rendering, I sacrificed the  
+lower case letters in the font.  I updated the table of timings, below.  
+  
 1. INTRODUCTION
 
 This is a game I have always loved, from the moment I saw it in a computer shop
