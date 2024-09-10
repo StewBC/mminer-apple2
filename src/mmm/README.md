@@ -19,7 +19,7 @@ The CMakeLists.txt file works for my installation.  This is my note at the top w
 # least, nothing ever works as advertised.  If you know what you are doing and you want to build
 # this, what's here can be a guide to get you going.  I built this on macOS (not this file) and
 # WIN32.  After I modified it for macOS the WIN32 broke so I modified it for WIN32 and now the
-# APPLE is broken. Probably an easy fix if you knwo what you are doing which I cleary don't when
+# APPLE is broken. Probably an easy fix if you know what you are doing which I clearly don't when
 # it comes to SDL
 ```
   
