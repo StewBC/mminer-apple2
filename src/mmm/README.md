@@ -1,7 +1,7 @@
 # The Manic Miner Machine  
-The Manic Minder Machine is a very, very small Apple II emulator that I built specifically to run the version of Manic Miner that I made, for the Apple II, on my Windows PC.  Yesterday, after I finished my harte_6502 6502 cycle-accurate CPU emulator, I thought about doing a Commodore 64 emulator, but then realized that Manic Miner loads into RAM all in one go (well, the loader loads it), and I don't use any ROM routines.  
+The Manic Minder Machine is a very, very small Apple II emulator that I built specifically to run, on a modern computer, the unmodified 6502 version of Manic Miner that I made for the Apple II.  After I finished the harte_6502 project, a 6502 cycle-accurate CPU emulator, I thought about doing a Commodore 64 emulator, but then realized that Manic Miner loads into RAM all in one go (well, the loader loads it), and I don't use any ROM routines.  
   
-Manic Miner uses only the 2 hires banks (at $2000 and $4000), the Keyboard ($C000), Keyboard Strobe ($c010) and the speaker ($C030).  So building an emulator should be very easy.  Well, it was.  
+Manic Miner uses only the Keyboard ($C000), Keyboard Strobe ($c010), the speaker ($C030) and 2 hires banks (with toggles at $C054 and $C055).  So building an emulator should be very easy.  Well, it was.  
   
 My speaker code is beyond terrible, but I'll maybe figure that out later.  Turn audio off with M or S (Music & Sound).  ESC will quit.  O & P for left and right and SPACE to jump.  
   

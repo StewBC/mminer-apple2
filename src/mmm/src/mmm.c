@@ -221,7 +221,7 @@ void io_write_callback(MACHINE *m, uint16_t address, uint8_t value) {
 int AppleII_configure(MACHINE *m) {
 
     // Load the Manic Miner logo HGR and the game itself
-    memcpy(&RAM_MAIN[0x2000], manic_miner, manic_miner_size);
+    memcpy(&RAM_MAIN[0x4000], manic_miner, manic_miner_size);
 
     // RAM
     if(!ram_init(&m->ram, 1)) {
