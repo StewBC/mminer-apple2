@@ -10,7 +10,7 @@ My speaker code is beyond terrible, but I'll maybe figure that out later.  Turn 
 | --- | ---
 | 6502.c | The 6502 Machine
 | mminer.c | The 6502 Manic Miner compiled code
-| mmm.c | The Apple II emulator (all 403 lines of it ;)
+| mmm.c | The Apple II emulator (around 400 lines :)
   
 # Building the code  
 The CMakeLists.txt file works for my installation.  This is my note at the top which sums up my feelings and frustrations.  

@@ -22,7 +22,8 @@ uint8_t RAM_IO[RAM_SIZE];                         // 64K of IO port "mask" (0 = 
 #define LOWSCR      0xC054                        // Port that draw Hires from $2000
 #define HISCR       0xC055                        // Port that draws Hires from $4000
 
-// The start of a line of pixels (192 rows). (Add to active Hires page ie $2000 or $4000)
+// The start of a line of pixels (192 rows) in HGR memory.
+// (Add to active Hires page ie $2000 or $4000)
 uint16_t row_start[] = {
     0x0000,0x0400,0x0800,0x0C00,0x1000,0x1400,0x1800,0x1C00,
     0x0080,0x0480,0x0880,0x0C80,0x1080,0x1480,0x1880,0x1C80,
@@ -74,14 +75,13 @@ SDL_Renderer    *renderer;
 SDL_Surface     *surface;
 SDL_Texture     *texture;
 int             screen_updated = TARGET_FPS;      // Counter - at TARGET_FPS forces screen update
-int             active_page = 0x2000;             // 0x2000 or 0x4000 - active hires memory page
+int             active_page = 0x4000;             // 0x2000 or 0x4000 - active hires memory page
 
 // Global variables to emulate speaker clicks
-#define AMPLITUDE 28000
 #define SAMPLE_RATE 44100
-int     audio_paused = 0;                         // Audio is paused (0) or playing (1)
+int     audio_paused = 1;                         // Audio is paused (1) or playing (0)
 int     speaker_state = 0;                        // Tracks whether the speaker is in the "on" or "off" state
-double  frequency = 440.0;                        // Frequency in Hz (dynamically calculated )
+double  frequency = 440.0;                        // Frequency in Hz (dynamically calculated)
 Uint64  last_toggle_time = 0;                     // Last time the speaker was toggled (in performance counter ticks)
 Uint64  frequency_ticks = 0;                      // Frequency of the performance counter
 
@@ -146,44 +146,39 @@ void show_screen(uint16_t page) {
 
     // Loop through each row
     for (y = 0; y < 192; y++) {
-        uint32_t *p = &pixels[y * surface->w];    // Get the pointer to the start of the row in the SDL surface
-        int address = page + row_start[y];
+        // Get the pointer to the start of the row in the SDL surface
+        uint32_t *p = &pixels[y * surface->w];
+        // An index to "walk" the pixels in the surface
         int px = 0;
+        // Get the address where this row starts in HGR memory
+        int address = page + row_start[y];
 
-        // Loop through every 2 bytes (40 iterations for each 192-pixel row)
+        // Loop through every 2 bytes (40 iterations for each 280-pixel row - 140 color pixels)
         for (int x = 0; x < 40; x += 2) {
-            uint16_t col = (RAM_MAIN[address + x + 1] << 8) | RAM_MAIN[address + x]; // Combine two bytes into a 16-bit value
+            // Combine two bytes into a 16-bit value for ease of extracting pixels
+            uint16_t col = (RAM_MAIN[address + x + 1] << 8) | RAM_MAIN[address + x];
 
-            // Extract pixels and high bits
-            int p1 = (col & 0b0000000000000001) << 1  | (col & 0b0000000000000010) >> 1;
-            int p2 = (col & 0b0000000000000100) >> 1  | (col & 0b0000000000001000) >> 3;
-            int p3 = (col & 0b0000000000010000) >> 3  | (col & 0b0000000000100000) >> 5;
-            int p4 = (col & 0b0000000001000000) >> 5  | (col & 0b0000000100000000) >> 8;
-            int p5 = (col & 0b0000001000000000) >> 8  | (col & 0b0000010000000000) >> 10;
-            int p6 = (col & 0b0000100000000000) >> 10 | (col & 0b0001000000000000) >> 12;
-            int p7 = (col & 0b0010000000000000) >> 12 | (col & 0b0100000000000000) >> 14;
-
-            // High bits for color adjustment
+            // Extract the phase bits
             int ph1 = (col & 0b0000000010000000) >> 5;
             int ph2 = (col & 0b1000000000000000) >> 13;
 
-            // Precompute color indices for each pixel
-            int idx1 = p1 + ph1;
-            int idx2 = p2 + ph1;
-            int idx3 = p3 + ph1;
-            int idx4 = p4 + ph1;
-            int idx5 = p5 + ph2;
-            int idx6 = p6 + ph2;
-            int idx7 = p7 + ph2;
+            // Extract pixels and offset for phase bits
+            int p1 = ph1 + ((col & 0b0000000000000001) << 1  | (col & 0b0000000000000010) >> 1 );
+            int p2 = ph1 + ((col & 0b0000000000000100) >> 1  | (col & 0b0000000000001000) >> 3 );
+            int p3 = ph1 + ((col & 0b0000000000010000) >> 3  | (col & 0b0000000000100000) >> 5 );
+            int p4 = ph1 + ((col & 0b0000000001000000) >> 5  | (col & 0b0000000100000000) >> 8 );
+            int p5 = ph2 + ((col & 0b0000001000000000) >> 8  | (col & 0b0000010000000000) >> 10);
+            int p6 = ph2 + ((col & 0b0000100000000000) >> 10 | (col & 0b0001000000000000) >> 12);
+            int p7 = ph2 + ((col & 0b0010000000000000) >> 12 | (col & 0b0100000000000000) >> 14);
 
-            // Access the surface's pixels and set the pixel value from the palette
-            p[px++] = SDL_MapRGB(surface->format, palette[idx1].c[0], palette[idx1].c[1], palette[idx1].c[2]);
-            p[px++] = SDL_MapRGB(surface->format, palette[idx2].c[0], palette[idx2].c[1], palette[idx2].c[2]);
-            p[px++] = SDL_MapRGB(surface->format, palette[idx3].c[0], palette[idx3].c[1], palette[idx3].c[2]);
-            p[px++] = SDL_MapRGB(surface->format, palette[idx4].c[0], palette[idx4].c[1], palette[idx4].c[2]);
-            p[px++] = SDL_MapRGB(surface->format, palette[idx5].c[0], palette[idx5].c[1], palette[idx5].c[2]);
-            p[px++] = SDL_MapRGB(surface->format, palette[idx6].c[0], palette[idx6].c[1], palette[idx6].c[2]);
-            p[px++] = SDL_MapRGB(surface->format, palette[idx7].c[0], palette[idx7].c[1], palette[idx7].c[2]);
+            // Set the pixel value from the palette
+            p[px++] = SDL_MapRGB(surface->format, palette[p1].c[0], palette[p1].c[1], palette[p1].c[2]);
+            p[px++] = SDL_MapRGB(surface->format, palette[p2].c[0], palette[p2].c[1], palette[p2].c[2]);
+            p[px++] = SDL_MapRGB(surface->format, palette[p3].c[0], palette[p3].c[1], palette[p3].c[2]);
+            p[px++] = SDL_MapRGB(surface->format, palette[p4].c[0], palette[p4].c[1], palette[p4].c[2]);
+            p[px++] = SDL_MapRGB(surface->format, palette[p5].c[0], palette[p5].c[1], palette[p5].c[2]);
+            p[px++] = SDL_MapRGB(surface->format, palette[p6].c[0], palette[p6].c[1], palette[p6].c[2]);
+            p[px++] = SDL_MapRGB(surface->format, palette[p7].c[0], palette[p7].c[1], palette[p7].c[2]);
         }
     }
 
@@ -196,7 +191,7 @@ void show_screen(uint16_t page) {
     screen_updated = 0;
 }
 
-// Note the actual program counter and value read from RAM on a read
+// Handle the Apple II ports used by Manic Miner
 uint8_t io_read_callback(MACHINE *m, uint16_t address) {
     switch(address) {
         case KBDSTRB:
@@ -217,7 +212,7 @@ uint8_t io_read_callback(MACHINE *m, uint16_t address) {
     return m->read_pages.pages[address / PAGE_SIZE].memory[address % PAGE_SIZE];
 }
 
-// Note the actual program counter and value written to RAM on a write
+// Writing to these ports is the same as reading from them
 void io_write_callback(MACHINE *m, uint16_t address, uint8_t value) {
     io_read_callback(m, address);
 }
@@ -275,7 +270,7 @@ int AppleII_configure(MACHINE *m) {
 }
 
 // Set up SDL graphics and Audio
-int initSDL() {
+int init_sdl() {
     // Initialize SDL with video and audio
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_TIMER) < 0) {
         printf("SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
@@ -308,7 +303,7 @@ int initSDL() {
         return 0;
     }
 
-    // Now the Audio
+    // Now init the Audio
     SDL_AudioSpec wanted_spec;
     SDL_AudioSpec obtained_spec;
 
@@ -341,7 +336,7 @@ int main(int argc, char* argv[]) {
     Uint64 start_time, end_time;
     Uint64 ticks_per_clock_cycl = frequency_ticks / CPU_FREQUENCY; // Ticks per microsecond
 
-    if(!initSDL()) {
+    if(!init_sdl()) {
         return 1;
     }
 
@@ -381,7 +376,7 @@ int main(int argc, char* argv[]) {
 
         // When the speaker is not being toggled, it needs to turn off
         end_time = SDL_GetPerformanceCounter();
-        if(audio_paused && end_time - last_toggle_time > (frequency_ticks / 8)) {
+        if(!audio_paused && end_time - last_toggle_time > (frequency_ticks / 8)) {
             audio_paused = 1;
             SDL_PauseAudio(1);
             end_time = SDL_GetPerformanceCounter();

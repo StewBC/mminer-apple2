@@ -11,7 +11,7 @@ struct MEMORY_REGION {
     uint8_t  *memory;
 };
 
-/* RAM_BANK is */
+/* RAM contains an array of MEMORY_REGIONS which may (or not) be mapped into the 6502's 64K*/
 typedef struct MEMORY_REGION RAM_BANK;
 struct RAM {
     RAM_BANK *ram_banks;
@@ -118,10 +118,6 @@ uint8_t roms_init(ROMS *roms, uint16_t num_roms);
 void    rom_add(ROMS *roms, uint8_t rom_num, uint32_t address, uint32_t length, uint8_t *memory);
 uint8_t pages_init(PAGES *pages, uint16_t num_pages);
 void    pages_map(PAGES *pages, uint32_t start_page, uint32_t num_pages, uint8_t *memory);
-
-// Exposed so that HARTE tests can be loaded and checked
-uint8_t read_from_memory(MACHINE *m, uint16_t address);
-void    write_to_memory(MACHINE *m, uint16_t address, uint8_t value);
 
 // 1 time init
 void    cpu_init(CPU *cpu);
