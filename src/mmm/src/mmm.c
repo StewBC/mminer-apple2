@@ -129,7 +129,7 @@ void audio_callback(void* userdata, Uint8* stream, int len) {
         buffer[i] = speaker_state;                 // Left channel
         buffer[i + 1] = speaker_state;             // Right channel
 
-        // Toggle speaker state after `samples_per_toggle` samples
+        // Toggle speaker state after samples_per_toggle samples
         if (++sample_index >= samples_per_toggle) {
             sample_index = 0;                     // Reset the sample index
             speaker_state = -speaker_state;       // Toggle speaker state (square wave generation)
@@ -332,7 +332,6 @@ int main(int argc, char* argv[]) {
     int quit = 0;
     SDL_Event e;
     Uint64 start_time, end_time;
-    Uint64 ticks_per_clock_cycl = frequency_ticks / CPU_FREQUENCY; // Ticks per microsecond
 
     if(!init_sdl()) {
         return 1;
@@ -340,6 +339,7 @@ int main(int argc, char* argv[]) {
 
     // Make this machine an Apple II and load Manic Miner into RAM
     AppleII_configure(&m);
+    Uint64 ticks_per_clock_cycle = frequency_ticks / CPU_FREQUENCY; // Ticks per microsecond
 
     // Start running the sim loop
     while (!quit) {
@@ -360,7 +360,11 @@ int main(int argc, char* argv[]) {
         }
 
         // Step the Apple II sim one cycle
-        machine_step(&m);
+        int cycles = 0;
+        do {
+            machine_step(&m);
+            cycles++;
+        } while(m.cpu.instruction_cycle != -1);
 
         // If a call was made to the MLI, it's to QUIT
         if(m.cpu.pc == MLI) {
@@ -381,7 +385,7 @@ int main(int argc, char* argv[]) {
         }
 
         // Try to lock the SIM to the Apple II 1.023 MHz
-        while ((end_time - start_time) < ticks_per_clock_cycl) {
+        while ((end_time - start_time) < (ticks_per_clock_cycle * cycles)) {
             end_time = SDL_GetPerformanceCounter();
         }
     }
