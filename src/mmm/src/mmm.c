@@ -359,9 +359,10 @@ int main(int argc, char* argv[]) {
             }
         }
 
-        // Step the Apple II sim one cycle
+        // Step the sim one instruction
         int cycles = 0;
         do {
+            // Step the sim one cycle
             machine_step(&m);
             cycles++;
         } while(m.cpu.instruction_cycle != -1);
