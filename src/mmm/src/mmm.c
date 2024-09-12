@@ -279,9 +279,9 @@ int init_sdl() {
 
     // Set up the speaker now that the obtained freq is known
     memset(&speaker, 0, sizeof(speaker));
-    memset(speaker.samples, 0, NUM_SAMPLES * sizeof(float));
+    // Should be obtained_spec.freq instead of SAMPLE_RATE, I think, but that doesn't work on macOS
     // The 1.5 is a fudge number to make sure the audio doesn't lag
-    speaker.sample_rate = ((float)CPU_FREQUENCY / obtained_spec.freq) + 1.5f;
+    speaker.sample_rate = ((float)CPU_FREQUENCY / SAMPLE_RATE) + 1.5f;
 
     return 1;
 }
