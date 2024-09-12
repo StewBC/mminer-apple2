@@ -69,6 +69,23 @@ mRGB palette[8] = {
     {0XFF, 0XFF, 0XFF},                           // White
 };
 
+// Global variables to emulate speaker clicks
+#define SAMPLE_RATE 44100
+enum {
+    SAMPLE_PREVIOUS,
+    OUTPUT_PREVIOUS,
+    SAMPLE_CURRENT,
+    NUM_SAMPLES,
+};
+struct A2SPEAKER {
+    float   speaker_state;
+    float   sample_rate;
+    float   samples[NUM_SAMPLES];
+};
+typedef struct A2SPEAKER A2SPEAKER;
+// Speaker should be part of MACHINE but I don't want to modify 6502.?
+A2SPEAKER speaker;
+
 // Global handles for SDL rendering
 SDL_Window      *window;
 SDL_Renderer    *renderer;
@@ -76,66 +93,6 @@ SDL_Surface     *surface;
 SDL_Texture     *texture;
 int             screen_updated = TARGET_FPS;      // Counter - at TARGET_FPS forces screen update
 int             active_page = 0x4000;             // 0x2000 or 0x4000 - active hires memory page
-
-// Global variables to emulate speaker clicks
-#define SAMPLE_RATE 44100
-int     audio_paused = 1;                         // Audio is paused (1) or playing (0)
-float   speaker_state = 1.0;                      // Tracks whether the speaker is in the "high" or "low" state
-double  frequency = 440.0;                        // Frequency in Hz (dynamically calculated)
-Uint64  last_toggle_time = 0;                     // Last time the speaker was toggled (in performance counter ticks)
-Uint64  frequency_ticks = 0;                      // Frequency of the performance counter
-
-// Function that gets called when the Apple II code toggles the speaker
-void speaker_toggle() {
-    // Get the current time in performance counter ticks
-    Uint64 current_time = SDL_GetPerformanceCounter();
-
-    // If this isn't the first toggle, calculate the time difference (period)
-    if (last_toggle_time != 0) {
-        Uint64 period_ticks = current_time - last_toggle_time; // Time between toggles in ticks
-        double period_us = (double)period_ticks * 1000000.0 / (double)frequency_ticks; // Convert ticks to microseconds
-
-        if (period_us > 0) {
-            // Calculate frequency in Hz (1000000 microseconds = 1 second,
-            // so frequency = 1000000 / period_us)
-            frequency = 1000000.0 / period_us;
-        }
-    }
-
-    // Update the last toggle time
-    last_toggle_time = current_time;
-
-    // Toggle the speaker state between 1 (high) and -1 (low)
-    speaker_state = -speaker_state;
-
-    // (re)start the SDL audio
-    if(audio_paused) {
-        audio_paused = 0;
-        SDL_PauseAudio(0);
-    }
-}
-
-// SDL audio callback to generate the square wave
-void audio_callback(void* userdata, Uint8* stream, int len) {
-    float* buffer = (float*)stream;               // Output buffer (32-bit float samples)
-    int length = len / sizeof(float);             // Number of float samples to generate
-    static int sample_index = 0;
-
-    // Calculate the number of samples per toggle based on the frequency
-    int samples_per_toggle = (int)(SAMPLE_RATE / (frequency / 1.75));
-
-    for (int i = 0; i < length; i += 2) {         // Increment by 2 because of stereo (2 channels)
-        // Stereo output: Set both left (i) and right (i + 1) channels
-        buffer[i] = speaker_state;                 // Left channel
-        buffer[i + 1] = speaker_state;             // Right channel
-
-        // Toggle speaker state after samples_per_toggle samples
-        if (++sample_index >= samples_per_toggle) {
-            sample_index = 0;                     // Reset the sample index
-            speaker_state = -speaker_state;       // Toggle speaker state (square wave generation)
-        }
-    }
-}
 
 // Present the selected HiRes screen (page)
 void show_screen(uint16_t page) {
@@ -196,7 +153,7 @@ uint8_t io_read_callback(MACHINE *m, uint16_t address) {
             RAM_MAIN[KBD] &= 0x7F;
         break;
         case SPEAKER:
-            speaker_toggle();
+            speaker.speaker_state = 1.0f - speaker.speaker_state;
             break;
         case LOWSCR:
             active_page = 0x2000;
@@ -289,12 +246,14 @@ int init_sdl() {
         return 0;
     }
 
+    // Create RGB surface
     surface = SDL_CreateRGBSurface(0, 140, 192, 32, 0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000);
     if(surface == NULL) {
         printf("Surface could not be created! SDL_Error: %s\n", SDL_GetError());
         return 0;
     }
 
+    // Create texture for pixel rendering
     texture = SDL_CreateTextureFromSurface(renderer, surface);
     if(texture == NULL) {
         printf("Texture could not be created! SDL_Error: %s\n", SDL_GetError());
@@ -310,20 +269,19 @@ int init_sdl() {
     wanted_spec.format = AUDIO_F32SYS;
     wanted_spec.channels = 2;                     // Stereo sound
     wanted_spec.samples = 4096;                   // Buffer size
-    wanted_spec.callback = audio_callback;
+    wanted_spec.callback = NULL;                  // No callback
 
     // Open the audio device
     if (SDL_OpenAudio(&wanted_spec, &obtained_spec) < 0) {
         printf("Couldn't open audio! SDL_Error: %s\n", SDL_GetError());
-        SDL_Quit();
         return 0;
     }
 
-    // Start with Audio paused
-    SDL_PauseAudio(1);
-
-    // Init the global
-    frequency_ticks = SDL_GetPerformanceFrequency(); // Ticks per second
+    // Set up the speaker now that the obtained freq is known
+    memset(&speaker, 0, sizeof(speaker));
+    memset(speaker.samples, 0, NUM_SAMPLES * sizeof(float));
+    // The 1.5 is a fudge number to make sure the audio doesn't lag
+    speaker.sample_rate = ((float)CPU_FREQUENCY / obtained_spec.freq) + 1.5f;
 
     return 1;
 }
@@ -331,15 +289,25 @@ int init_sdl() {
 int main(int argc, char* argv[]) {
     int quit = 0;
     SDL_Event e;
+    float sample_cycles;
     Uint64 start_time, end_time;
+    Uint64 ticks_per_clock_cycle = SDL_GetPerformanceFrequency() / CPU_FREQUENCY; // Ticks per microsecond
 
     if(!init_sdl()) {
+        SDL_Quit();
         return 1;
     }
 
     // Make this machine an Apple II and load Manic Miner into RAM
     AppleII_configure(&m);
-    Uint64 ticks_per_clock_cycle = frequency_ticks / CPU_FREQUENCY; // Ticks per microsecond
+
+    // Start the audio
+    SDL_PauseAudio(0);
+
+    // After init_sdl that sets up speaker.sample_rate
+    sample_cycles = speaker.sample_rate;
+    const float alpha = 0.98f;                    // High pass filter coefficient
+    const float beta = 0.98f;                     // Low pass filter coefficient
 
     // Start running the sim loop
     while (!quit) {
@@ -365,6 +333,27 @@ int main(int argc, char* argv[]) {
             // Step the sim one cycle
             machine_step(&m);
             cycles++;
+            speaker.samples[SAMPLE_CURRENT] += speaker.speaker_state;
+            if(--sample_cycles <= 0.0f) {
+                float output_previous = speaker.samples[OUTPUT_PREVIOUS];
+                float sample_previous = speaker.samples[SAMPLE_PREVIOUS];
+                float sample_current = speaker.samples[SAMPLE_CURRENT];
+                // Calculate a high pass and low pass filtered sample
+                float high_pass_result = alpha * (output_previous + sample_current - sample_previous);
+                float filter_result = beta * high_pass_result + (1 - beta) * output_previous;
+                // Save the current sample of next time
+                speaker.samples[SAMPLE_PREVIOUS] = sample_current;
+                // And make the filtered sample prev and also use as left and right for SDL
+                speaker.samples[OUTPUT_PREVIOUS] = filter_result;
+                speaker.samples[SAMPLE_CURRENT] = filter_result;
+                // Queue the stero samples
+                SDL_QueueAudio(1, &speaker.samples[OUTPUT_PREVIOUS], 2 * sizeof(float));
+                // Start a new sample
+                speaker.samples[SAMPLE_CURRENT] = 0.0f;
+                // Reset when the next samples will be queued
+                sample_cycles += speaker.sample_rate;
+
+            }
         } while(m.cpu.instruction_cycle != -1);
 
         // If a call was made to the MLI, it's to QUIT
@@ -379,11 +368,6 @@ int main(int argc, char* argv[]) {
 
         // When the speaker is not being toggled, it needs to turn off
         end_time = SDL_GetPerformanceCounter();
-        if(!audio_paused && end_time - last_toggle_time > (frequency_ticks / 32)) {
-            audio_paused = 1;
-            SDL_PauseAudio(1);
-            end_time = SDL_GetPerformanceCounter();
-        }
 
         // Try to lock the SIM to the Apple II 1.023 MHz
         while ((end_time - start_time) < (ticks_per_clock_cycle * cycles)) {
