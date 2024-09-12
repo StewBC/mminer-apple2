@@ -1,9 +1,9 @@
 # The Manic Miner Machine  
-The Manic Minder Machine is a very, very small Apple II emulator that I built specifically to run, on a modern computer, the unmodified 6502 version of Manic Miner that I made for the Apple II.  After I finished the harte_6502 project, a 6502 cycle-accurate CPU emulator, I thought about doing a Commodore 64 emulator, but then realized that Manic Miner loads into RAM all in one go (well, the loader loads it), and I don't use any ROM routines.  
+The Manic Minder Machine is a very, very small Apple II emulator that I built specifically to run, on a modern computer, the unmodified 6502 version of Manic Miner that I made for the Apple II.  
   
-Manic Miner uses only the Keyboard ($C000), Keyboard Strobe ($c010), the speaker ($C030) and 2 hires banks (with toggles at $C054 and $C055).  So building an emulator should be very easy.  Well, it was.  
+Manic Miner uses only the Keyboard ($C000), Keyboard Strobe ($C010), the speaker ($C030) and 2 hires banks (with toggles at $C054 and $C055).  So building an emulator should be very easy.  Well, it was.  
   
-My speaker code is beyond terrible, but I'll maybe figure that out later.  Turn audio off with M or S (Music & Sound).  ESC will quit.  O & P for left and right and SPACE to jump.  
+Turn audio off with M or S (Music & Sound).  ESC will quit.  O & P for left and right and SPACE to jump.  The original ZX Spectum cheat will also work.
   
 # The Files  
 | File | Description
@@ -24,10 +24,10 @@ The CMakeLists.txt file works for my installation.  This is my note at the top w
 ```
   
 # The Speed  
-On my M3 Mac Mini, the harte_6502 test run in 11s and on my windows PC in 35s.  But the emulator runs great on Windows, and can run a little faster than the 1.023 MHz that the Apple II runs at.  But the emulator runs pretty slow on my M3 Mac Mini.  I did not look to see if the issue is related to SDL_GetPerformanceFrequency or something else.  
+The game runs equally well on my M3 Mac Mini as well as on my Windows PC.  I did not build for Linux.  
   
 # The Future  
-I will probably not do too much with this.  I'll see about fixing the audio.  
+I will probably not do too much with this.
   
 Feel free to contact me at swessels@email.com if you have thoughts or suggestions.  
   
