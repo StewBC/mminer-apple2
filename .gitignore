@@ -3,4 +3,6 @@
 /obj/
 /Makefile.options
 /mminer.dsk
+/mminer.po
 /mminer.apple2*
+/ominer.apple2*

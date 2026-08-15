@@ -2,6 +2,13 @@
  Remake of the ZX Spectrum game for the Apple II.
 
 ## Updates:
+* 14 August 2026.
+I added a single screen version of the game.  It uses 3.5 pixels per screen  
+column so there's no scrolling.  Obviously the art quality is much lower  
+but it is also much closer to the original experience.  Same Apple II 
+keyboard issues, so keys still act like toggles.  In many ways this is the
+superior version, just not so pretty.  
+  
 * 9 September 2024.  
 Check out the Manic Miner Machine!  It's an Apple II "emulator" that I built  
 just to run the Apple II version of manic Miner on a modern computer, using  

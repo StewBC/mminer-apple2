@@ -15,7 +15,8 @@ REMOVES += $(DSK)
 .PHONY: dsk
 dsk: $(DSK)
 
-$(DSK): $(NAME).apple2
+$(DSK): $(NAME).apple2 loader noscroll
 	$(call CP, apple2/template.dsk $@)
 	java -jar $(AC) -p  $@ $(NAME).system sys < $(NAME).apple2.loader
 	java -jar $(AC) -as $@ $(NAME)        bin < $(NAME).apple2
+	java -jar $(AC) -as $@ $(NOSCROLL_NAME) bin < $(NOSCROLL)

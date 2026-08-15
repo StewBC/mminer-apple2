@@ -53,7 +53,7 @@ OBJDIR :=
 
 # Command used to run the emulator.
 # Default: depending on target platform. For default (c64) target: x64 -kernal kernal -VICIIdsize -autoload
-EMUCMD :=
+EMUCMD = ../a2m-v2/build/a2m-v2 -d $(NAME).po
 
 # On Windows machines VICE emulators may not be available in the PATH by default.
 # In such case, please set the variable below to point to directory containing

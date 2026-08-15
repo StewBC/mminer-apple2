@@ -6,14 +6,18 @@
 
 A1L             := $3C
 A1H             := $3D
+A2L             := $3E
+A2H             := $3F
 PATHNAME        := $0280
 MLI             := $BF00
+KBDSTRB         := $C010    ; Clear keyboard strobe
 TXTCLR          := $C050    ; Display graphics
 TXTSET          := $C051    ; Display text
 MIXCLR          := $C052    ; Disable 4 lines of text
 LOWSCR          := $C054    ; Page 1
 HISCR           := $C055    ; Page 2
 HIRES           := $C057    ; Hires graphics
+HOME            := $FC58
 VERSION         := $FBB3
 RDKEY           := $FD0C
 PRBYTE          := $FDDA
@@ -25,6 +29,10 @@ READ_CALL       = $CA
 CLOSE_CALL      = $CC
 
 FILE_NOT_FOUND_ERR = $46
+
+; Both game binaries have file names of the same length, so a version is
+; selected simply by overwriting the file name part of our own pathname.
+NAME_LEN        = 6
 
 ; ------------------------------------------------------------------------
 
@@ -53,6 +61,36 @@ QUIT_PARAM:
                 .word   $0000           ;RESERVED
                 .byte   $00             ;RESERVED
                 .word   $0000           ;RESERVED
+
+; Version 1 .. 2 select a game binary, version 3 quits to ProDOS
+NAME_TABLE:
+                .addr   NAME_SCROLL
+                .addr   NAME_ONE_SCREEN
+
+NAME_SCROLL:
+                .byte   "MMINER"
+        .assert * - NAME_SCROLL = NAME_LEN, error, "NAME_SCROLL length"
+NAME_ONE_SCREEN:
+                .byte   "OMINER"
+        .assert * - NAME_ONE_SCREEN = NAME_LEN, error, "NAME_ONE_SCREEN length"
+
+MENU:
+                .byte   "Play Manic Miner.", $0D
+                .byte   $0D
+                .byte   "  1. With scrolling.", $0D
+                .byte   "     This is the pretty version.", $0D
+                .byte   $0D
+                .byte   "  2. One screen version.", $0D
+                .byte   "     No scrolling but art quality", $0D
+                .byte   "     had to be sacrificed.", $0D
+                .byte   $0D
+                .byte   "  3. Quit.", $0D
+                .byte   $0D
+                .byte   "Press 1 or 2 to choose a version or 3", $0D
+                .byte   "to exit back to ProDOS.", $0D
+                .byte   $00
+        ; PRINT walks a string with a single index register
+        .assert * - MENU <= $0100, error, "MENU too long for PRINT"
 
 LOADING:
                 .byte   $0D
@@ -89,6 +127,57 @@ PRESS_ANY_KEY:
         lda     #$00
         sta     PATHNAME+1,x
 
+        ; Turn off 80-column firmware
+        lda     VERSION
+        cmp     #$06        ; //e ?
+        bne     :+
+        lda     #$15
+        jsr     $C300
+
+        ; Ask which version to play
+:       bit     TXTSET
+        bit     LOWSCR
+        jsr     HOME
+        lda     #<MENU
+        ldx     #>MENU
+        jsr     PRINT
+
+        bit     KBDSTRB     ; ignore a key left over by ProDOS
+:       jsr     RDKEY
+        and     #$7F
+        sec
+        sbc     #'1'
+        cmp     #$03        ; '1' .. '3' ?
+        bcs     :-
+        cmp     #$02        ; '3' - back to ProDOS
+        bne     :+
+        jmp     QUIT
+
+:       asl     a           ; version -> NAME_TABLE index
+        tay
+        lda     NAME_TABLE,y
+        sta     A2L
+        lda     NAME_TABLE+1,y
+        sta     A2H
+
+        ; Point A1 at the file name part of the pathname ...
+        lda     PATHNAME
+        clc
+        adc     #<(PATHNAME + 1 - NAME_LEN)
+        sta     A1L
+        lda     #>(PATHNAME + 1 - NAME_LEN)
+        adc     #$00
+        sta     A1H
+
+        ; ... and replace it with the name of the version chosen
+        ldy     #NAME_LEN - 1
+:       lda     (A2L),y
+        sta     (A1L),y
+        dey
+        bpl     :-
+
+        jsr     HOME
+
         ; Provide some user feedback
         lda     #<LOADING
         ldx     #>LOADING
@@ -111,15 +200,8 @@ PRESS_ANY_KEY:
         sta     READ_REF
         sta     CLOSE_REF
 
-        ; Turn off 80-column firmware
-        lda     VERSION
-        cmp     #$06        ; //e ?
-        bne     :+
-        lda     #$15
-        jsr     $C300
-
         ; Switch to hires page 2
-:       bit     TXTCLR
+        bit     TXTCLR
         bit     MIXCLR
         bit     HISCR
         bit     HIRES
@@ -174,6 +256,8 @@ ERROR:
         ldx     #>PRESS_ANY_KEY
         jsr     PRINT
         jsr     RDKEY
+
+QUIT:
         jsr     MLI
         .byte   QUIT_CALL
         .word   QUIT_PARAM
